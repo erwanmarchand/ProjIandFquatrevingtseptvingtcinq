@@ -5,33 +5,50 @@ import sys
 import os
 import math
 from scipy import signal
+from pointdInteret import PointdInteret
+from extremaDetector import ExtremaDetector
 
 IMAGES_PATH = "Images\\"
 ORIGINAL_IMAGES_PATH = IMAGES_PATH+"Original\\"
 GENERATED_IMAGES_PATH = IMAGES_PATH+"Generated\\"
 
+NAME_PICTURE = 'lena2'
+
 def gaussian(x,y,sigma):
     temp = math.exp(-((x*x)+(y*y))/(2*sigma*sigma))
     return temp/(2*sigma*sigma*math.pi)
 
-imageLena = cv2.imread(ORIGINAL_IMAGES_PATH+'lena.jpg')
+#imageLena = cv2.imread(ORIGINAL_IMAGES_PATH+'lena.jpg')
+imageLena = cv2.imread(ORIGINAL_IMAGES_PATH+NAME_PICTURE+'.jpg')
 imageLenaGrey = cv2.cvtColor( imageLena, cv2.COLOR_RGB2GRAY )
 
 #cv2.imwrite( GENERATED_IMAGES_PATH+"grey.png", imageLenaGrey )
 
 sigma = 1.6
 octave = 1
-imageGreyBlur = []
 
-for i in range (1,4):
 
-    dim = (imageLenaGrey.shape[0]/octave,imageLenaGrey.shape[1]/octave)
+maxI = 3
+maxk = 5
+
+
+extremaDetect = ExtremaDetector(imageLenaGrey,sigma,maxk,maxI)
+extremaDetect.generateDiffGaussian()
+
+
+for i in range (1,maxI+1):
+
+    imageGreyBlurOctave = []
+    diffGaussOctave = []
+
+    dim = (imageLenaGrey.shape[1]/octave,imageLenaGrey.shape[0]/octave)
     resized = cv2.resize(imageLenaGrey, dim)
-    cv2.imwrite( GENERATED_IMAGES_PATH+"blur.k="+str(0)+".octave="+str(octave)+".png",resized )
+    imageGreyBlurOctave.append(resized.copy())
+    cv2.imwrite( GENERATED_IMAGES_PATH+NAME_PICTURE+".blur.k="+str(0)+".octave="+str(octave)+".png",resized )
 
-    for k in range (1,6):
+    for k in range (1,maxk+1):
 
-        imageGreyBlur.append(resized.copy())
+        imageGreyBlurOctave.append(resized.copy())
 
         maxDist = int(math.floor(3 * k * sigma)+1)
 
@@ -48,40 +65,27 @@ for i in range (1,4):
 
         #print kernel
 
-        imageGreyBlur[k-1] = signal.convolve2d(resized, kernel, boundary='symm', mode='same')
-
-
-        ## HOMEMADE CONVOLUTION
-
-    #    gauss = np.zeros((maxDist, maxDist))
-    #
-    #    for x in range(0,maxDist):
-    #        for y in range(0, maxDist):
-    #            gauss[x,y] = gaussian(x,y,k*sigma)
-    #
-    #
-    #    for x in range(0, imageGreyBlur[k-1].shape[0]):
-    #        for y in range(0, imageGreyBlur[k-1].shape[1]):
-    #            pixel = 0
-    #            for distancex in range(-maxDist+1, maxDist):
-    #                for distancey in range(-maxDist+1, maxDist):
-    #                    x2 = x + distancex
-    #                    y2 = y + distancey
-    #                    if (x2 >= 0 and y2 >=0 and x2 < imageGreyBlur[k-1].shape[0] and y2 < imageGreyBlur[k-1].shape[1] ):
-    #                        pixel = pixel + (imageLenaGrey[x2,y2] * gauss[abs(distancex),abs(distancey)])
-    #            imageGreyBlur[k-1][x,y] = pixel
-
-
-        #print imageLenaGrey.shape[0]
-
-        #print imageGreyBlur[100,100]
+        imageGreyBlurOctave[k] = signal.convolve2d(resized, kernel, boundary='symm', mode='same')
 
         print("sigma = "+str(sigma))
         print("octave = "+str(i))
         print("k = "+str(k))
         print("\n")
         
-        cv2.imwrite( GENERATED_IMAGES_PATH+"blur.k="+str(k)+".octave="+str(octave)+".png", imageGreyBlur[k-1] )
+        cv2.imwrite( GENERATED_IMAGES_PATH+NAME_PICTURE+".blur.k="+str(k)+".octave="+str(octave)+".png", imageGreyBlurOctave[k] )
+
+        
+
+        #difference de gaussien
+        diffGaussOctave.append(resized.copy())
+        for x in range(0, diffGaussOctave[k-1].shape[0]):
+            for y in range(0, diffGaussOctave[k-1].shape[1]):
+                diffGaussOctave[k-1][x,y] = max(0,imageGreyBlurOctave[k][x,y] - imageGreyBlurOctave[k-1][x,y])
+
+        cv2.imwrite( GENERATED_IMAGES_PATH+NAME_PICTURE+".diffgaussien.k="+str(k-1)+".octave="+str(octave)+".png", diffGaussOctave[k-1] )
+
+    imageGreyBlur.append(imageGreyBlurOctave)
+    diffGauss.append(diffGaussOctave)
 
     octave = octave * 2
 
