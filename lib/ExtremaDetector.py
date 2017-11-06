@@ -1,11 +1,13 @@
-from scipy import misc
 import numpy as np
 import cv2
-import sys
-import os
 import math
 from scipy import signal
-from pointdInteret import PointdInteret
+import math
+
+import cv2
+import numpy as np
+from scipy import signal
+
 
 class ExtremaDetector:
 

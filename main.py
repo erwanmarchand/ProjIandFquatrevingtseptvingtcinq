@@ -1,12 +1,10 @@
-from scipy import misc
-import numpy as np
-import cv2
-import sys
-import os
 import math
+
+import cv2
+import numpy as np
 from scipy import signal
-from pointdInteret import PointdInteret
-from extremaDetector import ExtremaDetector
+
+from lib.ExtremaDetector import ExtremaDetector
 
 IMAGES_PATH = "Images\\"
 ORIGINAL_IMAGES_PATH = IMAGES_PATH+"Original\\"
