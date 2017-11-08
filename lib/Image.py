@@ -3,12 +3,13 @@ import math
 import numpy as np
 import scipy.signal as signal
 
+
 class Image:
     @staticmethod
     def loadMatrix(path, **kwargs):
         flag = kwargs.get('flag', cv2.IMREAD_GRAYSCALE)
         data = cv2.imread(path, flag)
-        #data = data/float(np.max(data))
+        # data = data/float(np.max(data))
 
         return data
 
@@ -29,7 +30,7 @@ class Image:
         som = 0
         for m in range(-P, P + 1):
             for n in range(-P, P + 1):
-                matrix[m + P][n + P] = math.exp(-(n **2 + m **2) / (2 * (sigma**2)))
+                matrix[m + P][n + P] = math.exp(-(n ** 2 + m ** 2) / (2 * (sigma ** 2)))
                 som += matrix[m + P][n + P]
         matrix = matrix / som
         return matrix
