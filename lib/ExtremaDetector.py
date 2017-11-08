@@ -8,7 +8,7 @@ class ExtremaDetector:
         if image is None:
             raise Exception("Erreur : Aucune image envoyee ")
 
-        nb_element = s+3
+        nb_element = s + 3
 
         # Construction de la pyramide de gaussiennes
         sigmas = [1.6 * 2 ** (float(k) / float(s)) for k in range(nb_element)]
@@ -29,9 +29,7 @@ class ExtremaDetector:
             for k in range(nb_element - 1):
                 doG[octave].append(Image.makeDifference(pyramid[octave][k + 1], pyramid[octave][k]))
 
-
         ExtremaDetector.showPyramid(doG, sigmas)
-
 
     @staticmethod
     def showPyramid(pyramid, sigmas):
