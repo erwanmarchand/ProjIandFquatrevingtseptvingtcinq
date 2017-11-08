@@ -6,22 +6,11 @@ from scipy import signal
 
 from lib.ExtremaDetector import ExtremaDetector
 
-IMAGES_PATH = "Images\\"
-ORIGINAL_IMAGES_PATH = IMAGES_PATH+"Original\\"
-GENERATED_IMAGES_PATH = IMAGES_PATH+"Generated\\"
+IMAGES_PATH = "images\\"
+ORIGINAL_IMAGES_PATH = IMAGES_PATH + "original\\"
+GENERATED_IMAGES_PATH = IMAGES_PATH + "generated\\"
 
 NAME_PICTURE = 'lena2'
-
-def gaussian(x,y,sigma):
-    temp = math.exp(-((x*x)+(y*y))/(2*sigma*sigma))
-    return temp/(2*sigma*sigma*math.pi)
-
-#imageLena = cv2.imread(ORIGINAL_IMAGES_PATH+'lena.jpg')
-imageLena = cv2.imread(ORIGINAL_IMAGES_PATH+NAME_PICTURE+'.jpg')
-imageLenaGrey = cv2.cvtColor( imageLena, cv2.COLOR_RGB2GRAY )
-
-#cv2.imwrite( GENERATED_IMAGES_PATH+"grey.png", imageLenaGrey )
-
 sigma = 1.6
 octave = 1
 
