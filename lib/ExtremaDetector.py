@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
-from lib.ImageManager import *
 import matplotlib.pyplot as plt
-from lib.Log import *
+
+from lib.ImageManager import *
+from lib.debug.Log import *
 
 
 class ExtremaDetector:
@@ -56,7 +57,9 @@ class ExtremaDetector:
             return extremum
 
         def _filtrerPointsCandidats(candidats):
-            pass
+            realPoints = candidats
+
+            return realPoints
 
         candidats = _detectionExtremums()
         for i, ext in candidats:
