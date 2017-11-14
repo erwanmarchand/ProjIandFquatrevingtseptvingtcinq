@@ -4,7 +4,7 @@ import cv2
 import math
 import numpy as np
 import scipy.signal as signal
-
+import matplotlib.pyplot as plt
 
 class Image:
     @staticmethod

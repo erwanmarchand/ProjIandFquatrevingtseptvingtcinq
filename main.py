@@ -14,4 +14,6 @@ maxI = 3
 maxk = 5
 
 img = Image.loadMatrix(ORIGINAL_IMAGES_PATH + NAME_PICTURE)
-ExtremaDetector.differenceDeGaussienne(img, 3, 4)
+ExtremaDetector.differenceDeGaussienne(img, 3, 1, verbose=True)
+
+
