@@ -1,19 +1,16 @@
 # -*- coding: utf-8 -*-
 from lib.ExtremaDetector import ExtremaDetector
-from lib.Image import *
+from lib.ImageManager import *
 
 IMAGES_PATH = "images/"
 ORIGINAL_IMAGES_PATH = IMAGES_PATH + "original/"
 GENERATED_IMAGES_PATH = IMAGES_PATH + "generated/"
 
-NAME_PICTURE = 'einstein.jpg'
-sigma = 1.6
+NAME_PICTURE = 'lena2.jpg'
+s = 3
 octave = 1
 
-maxI = 3
-maxk = 5
-
-img = Image.loadMatrix(ORIGINAL_IMAGES_PATH + NAME_PICTURE)
-ExtremaDetector.differenceDeGaussienne(img, 3, 1, verbose=True)
+img = ImageManager.loadMatrix(ORIGINAL_IMAGES_PATH + NAME_PICTURE)
+ExtremaDetector.differenceDeGaussienne(img, s, octave, verbose=True)
 
 
