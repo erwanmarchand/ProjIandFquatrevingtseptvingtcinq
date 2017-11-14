@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from lib.ExtremaDetector import ExtremaDetector
 from lib.Image import *
 

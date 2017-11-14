@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from lib.Image import *
 import matplotlib.pyplot as plt
 
@@ -6,7 +7,7 @@ class ExtremaDetector:
     @staticmethod
     def differenceDeGaussienne(image, s, nb_octave):
         if image is None:
-            raise Exception("Erreur : Aucune image envoyee ")
+            raise Exception("Erreur : Aucune image envoyee")
 
         nb_element = s + 3
 
@@ -33,6 +34,12 @@ class ExtremaDetector:
 
     @staticmethod
     def showPyramid(pyramid, sigmas):
+        """
+        Open a window and show a Pyramid
+        :param pyramid: The pyramid we want to watch
+        :param sigmas: The differents sigmas of the pyramid
+        :return: 
+        """
         nb_octave, nb_per_row = len(pyramid), len(pyramid[0])
 
         # Show pyramid
