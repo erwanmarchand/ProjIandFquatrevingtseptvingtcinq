@@ -102,9 +102,37 @@ class ExtremaDetector:
         def _assignOrientation(candidats):
             points = []
 
+            VOISINAGE_COTE = 5  # Pour n, on va faire un carre de x-n:x+n, y-n:y+n
+            # On creer le slice de l'histogramme
+            H_slice = np.linspace(0, 2 * np.pi, 36 + 1) # 37 valeurs, donc 36 intervalles
+
             for c in candidats:
                 (x, y, i) = c
+                H = np.zeros(36)
 
+                # Selection des cotés du voisinage en faisant attention aux bords
+                xMax, yMax, xMin, yMin = min(height - 1, x + VOISINAGE_COTE), \
+                                         min(width - 1, y + VOISINAGE_COTE), \
+                                         max(1, x - VOISINAGE_COTE), \
+                                         max(1, y - VOISINAGE_COTE)
+
+                base = octaves[i][xMin:xMax, yMin:yMax]
+                g, d, b, h = octaves[i][(xMin - 1):(xMax - 1), yMin:yMax], \
+                             octaves[i][(xMin + 1):(xMax + 1), yMin:yMax], \
+                             octaves[i][xMin:xMax, (yMin - 1):(yMax - 1)], \
+                             octaves[i][xMin:xMax, (yMin + 1):(yMax + 1)]
+
+                # Calcul des amplitude des gradients et de l'orientation
+                M = np.sqrt(np.power(d - g, 2) + np.power(b - h, 2))
+                A = np.arctan((b - h) / (d - g))
+
+                # Analyse des résultats, on applatit le slice de la matrice
+                Ms, As = M.flat, A.flat
+
+                for angle in As:
+                    for si in range(36):
+                        if angle <= H_slice[si + 1]:
+                            H[si] += 1
 
 
             return candidats
