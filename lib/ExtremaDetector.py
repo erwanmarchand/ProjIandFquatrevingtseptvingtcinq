@@ -19,7 +19,7 @@ class ExtremaDetector:
             raise Exception("Erreur : Aucune image envoyee")
 
         nb_element = s + 3
-        verbose = kwargs.get('verbose', False)
+        verbose, show_images = kwargs.get('verbose', False), kwargs.get('show_images', False)
 
         # Construction de la pyramide de gaussiennes
         sigmas = [1.6 * 2 ** (float(k) / float(s)) for k in range(nb_element)]
@@ -31,7 +31,7 @@ class ExtremaDetector:
             for k in range(nb_element):
                 pyramid[octave].append(ImageManager.applyGaussianFilter(octave_original, sigmas[k]))
 
-        if verbose:
+        if show_images:
             ExtremaDetector.showPyramid(pyramid, sigmas, title="Pyramide des images filtrees par un filtre gaussien")
 
         # Make difference
@@ -41,7 +41,7 @@ class ExtremaDetector:
             for k in range(nb_element - 1):
                 doG[octave].append(ImageManager.makeDifference(pyramid[octave][k + 1], pyramid[octave][k]))
 
-        if verbose:
+        if show_images:
             ExtremaDetector.showPyramid(doG, sigmas, title="Pyramide des DoGs")
 
         return doG, pyramid, sigmas
@@ -62,10 +62,10 @@ class ExtremaDetector:
 
         # Quelques vérifications d'usage afin de garantir le bon déroulement de la méthode
         if len(DoGs) == 0:
-            raise("Erreur : Aucune image DoGs fournie en parametre")
+            raise ("Erreur : Aucune image DoGs fournie en parametre")
 
         if len(DoGs) < 3:
-            raise("Erreur : Pas assez d'images DoGs fournies en paramètre (3 minimum)")
+            raise ("Erreur : Pas assez d'images DoGs fournies en paramètre (3 minimum)")
 
         # Execution
         height, width = ImageManager.getDimensions(DoGs[0])
@@ -82,14 +82,14 @@ class ExtremaDetector:
                 # On fait une boucle sur l'ensemble des pixels, bords exclus afin de ne pas avoir a faire du cas par cas
                 for x in range(1, height - 1):
                     for y in range(1, width - 1):
-                        neighbours = []
+                        maxNeighbours = []
 
-                        neighbours += [DoGs[i - 1][x - 1:x + 1, y - 1:y + 1]]
-                        neighbours += [DoGs[i][x - 1:x + 1, y - 1:y + 1]]
-                        neighbours += [DoGs[i + 1][x - 1:x + 1, y - 1:y + 1]]
+                        maxNeighbours += [np.max(DoGs[i - 1][x - 1:x + 2, y - 1:y + 2])]
+                        maxNeighbours += [np.max(DoGs[i][x - 1:x + 2, y - 1:y + 1])]
+                        maxNeighbours += [np.max(DoGs[i + 1][x - 1:x + 2, y - 1:y + 2])]
 
                         # Si le point est effectivement le maximum de la region, c'est un point candidat
-                        if DoGs[i][x, y] == np.max(neighbours):
+                        if DoGs[i][x, y] == np.max(maxNeighbours):
                             extremums.append((x, y, i))
 
             return extremums
@@ -113,7 +113,6 @@ class ExtremaDetector:
 
         def _assignOrientation(candidats):
             realPoints = []
-
             VOISINAGE_COTE = 5  # Pour n, on va faire un carre de x-n:x+n, y-n:y+n
             # On creer le slice de l'histogramme
             H_slice = np.linspace(0, 2 * np.pi, 36 + 1)  # 37 valeurs, donc 36 intervalles
@@ -148,12 +147,12 @@ class ExtremaDetector:
 
                 # On selectionne les angles ayant plus de 80% de la valeur maximale
                 mH, angles = np.max(H), []
-                for i, a in enumerate(H):
-                    if H[i] / mH >= 0.80:
-                        angles.append(a)
+                for k, a in enumerate(H):
+                    if H[k] / mH >= 0.80:
+                        angles.append(H_slice[k + 1])
 
                 for a in angles:
-                    realPoints.append((x, y, i, a))
+                    realPoints.append((x, y, sigmas[i], a))
 
             return realPoints
 
@@ -163,6 +162,7 @@ class ExtremaDetector:
         candidats = _filtrerPointsArete(candidats)
         candidats = _assignOrientation(candidats)
 
+        # Packaging des points clés
         return candidats
 
     @staticmethod
@@ -175,7 +175,7 @@ class ExtremaDetector:
         nb_octave, nb_per_row = len(pyramid), len(pyramid[0])
 
         # Show pyramid
-        Log.info("Affichage d'une pyramide : " + kwargs.get("title", "NO_NAME"))
+        Log.debug("Affichage d'une pyramide : " + kwargs.get("title", "NO_NAME"))
         for o in range(nb_octave):
             for k in range(nb_per_row):
                 plt.subplot(nb_octave, nb_per_row, (k + 1) + o * nb_per_row)

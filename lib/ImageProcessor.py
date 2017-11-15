@@ -8,24 +8,35 @@ class ImageProcessor:
     @staticmethod
     def findKeypoints(image, s, nb_octaves, **kwargs):
         # On construit la pyramide des gaussiennes
-        DoGs, octaves, sigmas = ExtremaDetector.differenceDeGaussienne(image, s, nb_octaves,
-                                                                       verbose=kwargs.get("verbose", False))
+        DoGs, octaves, sigmas = ExtremaDetector.differenceDeGaussienne(image, s, nb_octaves, **kwargs)
+
+        realPoints = []
 
         for i in range(len(octaves)):
             points = ExtremaDetector.detectionPointsCles(
-                DoGs[i],
-                octaves[i],
-                sigmas,
-                0.03,
-                0.6,
-                1 / (2 ** i)
+                    DoGs[i],
+                    octaves[i],
+                    sigmas,
+                    0.03,
+                    0.6,
+                    1 / (2 ** i)
             )
 
-            if kwargs.get("verbose", False):
-                Log.info("Nombre de points pour l'octave " + str(i) + " : " + str(len(points)))
+            # On fait un rescale des points clés
+            for kp in points:
+                (x, y, s, a) = kp
+                realPoints.append((x * (2 ** i), y * (2 ** i), s, a))
 
-    def showKeyPoints(self, image, keypoints):
-        for keypoint in keypoints:
+            if kwargs.get("verbose", False):
+                Log.debug("Nombre de points pour l'octave " + str(i) + " : " + str(len(points)))
+
+        return realPoints
+
+    @staticmethod
+    def showKeyPoints(image, keypoints):
+        for k, keypoint in enumerate(keypoints):
             image = ImageManager.showKeyPoint(image, keypoint)
+            if k > 200:
+                break
 
         return image
