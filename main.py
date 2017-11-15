@@ -6,7 +6,7 @@ IMAGES_PATH = "images/"
 ORIGINAL_IMAGES_PATH = IMAGES_PATH + "original/"
 GENERATED_IMAGES_PATH = IMAGES_PATH + "generated/"
 DEBUG = True
-NAME_PICTURE = 'lena2.jpg'
+NAME_PICTURE = 'gauche.jpg'
 
 s = 3
 octave = 3

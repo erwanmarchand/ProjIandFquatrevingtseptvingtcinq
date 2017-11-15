@@ -52,35 +52,42 @@ class ExtremaDetector:
         if len(DoGs) == 0:
             raise "Erreur : Aucune image DoGs fournie en parametre"
 
+        if len(DoGs) < 3:
+            raise "Erreur : Pas assez d'images DoGs fournies en paramètre (3 minimum)"
+
         # Execution
-        width, height = ImageManager.getDimensions(DoGs[0])
+        height, width = ImageManager.getDimensions(DoGs[0])
+
+        # Génération des DoGs normalisés (valeur en 0 et 1)
+        DoGsNormalized = []
+        for DoG in DoGs:
+            DoGsNormalized.append(ImageManager.normalizeImage(DoG))
 
         def _detectionExtremums():
             extremums = []
 
             for i in range(len(DoGs[1:-1])):
-                # On fait une boucle sur l'ensemble des pixels, bords exclus, afin de ne pas avoir a faire du cas par cas
+                # On fait une boucle sur l'ensemble des pixels, bords exclus afin de ne pas avoir a faire du cas par cas
                 for x in range(1, height - 1):
                     for y in range(1, width - 1):
-                        neighboors = []
+                        neighbours = []
 
-                        neighboors += [DoGs[i - 1][x - 1:x + 1, y - 1:y + 1]]
-                        neighboors += [DoGs[i][x - 1:x + 1, y - 1:y + 1]]
-                        neighboors += [DoGs[i + 1][x - 1:x + 1, y - 1:y + 1]]
+                        neighbours += [DoGs[i - 1][x - 1:x + 1, y - 1:y + 1]]
+                        neighbours += [DoGs[i][x - 1:x + 1, y - 1:y + 1]]
+                        neighbours += [DoGs[i + 1][x - 1:x + 1, y - 1:y + 1]]
 
                         # Si le point est effectivement le maximum de la region, c'est un point candidat
-                        if DoGs[i][x, y] == np.max(neighboors):
+                        if DoGs[i][x, y] == np.max(neighbours):
                             extremums.append((x, y, i))
 
             return extremums
-
 
         def _filtrerPointsContraste(candidats):
             realPoints = []
 
             for c in candidats:
                 (x, y, i) = c
-                if DoGs[i][x, y] > seuil_contraste:
+                if DoGsNormalized[i][x, y] > seuil_contraste:
                     realPoints.append(c)
 
             return realPoints
@@ -88,15 +95,25 @@ class ExtremaDetector:
         def _filtrerPointsArete(candidats):
             realPoints = candidats
 
-
             # On calcul la Hessienne
 
             return realPoints
+
+        def _assignOrientation(candidats):
+            points = []
+
+            for c in candidats:
+                (x, y, i) = c
+
+
+
+            return candidats
 
         candidats = _detectionExtremums()
         ## BONUS EVENTUEL ICI
         candidats = _filtrerPointsContraste(candidats)
         candidats = _filtrerPointsArete(candidats)
+        candidats = _assignOrientation(candidats)
 
         return candidats
 
@@ -105,7 +122,7 @@ class ExtremaDetector:
         """
         Open a window and show a Pyramid
         :param pyramid: The pyramid we want to watch
-        :param sigmas: The differents sigmas of the pyramid
+        :param sigmas: The different sigmas of the pyramid
         """
         nb_octave, nb_per_row = len(pyramid), len(pyramid[0])
 
