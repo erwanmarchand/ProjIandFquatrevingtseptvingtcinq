@@ -1,16 +1,19 @@
-from lib.ExtremaDetector import ExtremaDetector
-from lib.Image import *
+# -*- coding: utf-8 -*-
+from lib.ImageManager import *
+from lib.ImageProcessor import *
 
 IMAGES_PATH = "images/"
 ORIGINAL_IMAGES_PATH = IMAGES_PATH + "original/"
 GENERATED_IMAGES_PATH = IMAGES_PATH + "generated/"
+DEBUG = True
+NAME_PICTURE = 'lena2.jpg'
 
-NAME_PICTURE = 'einstein.jpg'
-sigma = 1.6
-octave = 1
+s = 3
+octave = 3
 
-maxI = 3
-maxk = 5
 
-img = Image.loadMatrix(ORIGINAL_IMAGES_PATH + NAME_PICTURE)
-ExtremaDetector.differenceDeGaussienne(img, 3, 4)
+# Algorithm
+img = ImageManager.loadMatrix(ORIGINAL_IMAGES_PATH + NAME_PICTURE)
+ImageProcessor.findKeypoints(img, s, octave, verbose=DEBUG)
+
+
