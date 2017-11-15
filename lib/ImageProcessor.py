@@ -23,3 +23,9 @@ class ImageProcessor:
 
             if kwargs.get("verbose", False):
                 Log.info("Nombre de points pour l'octave " + str(i) + " : " + str(len(points)))
+
+    def showKeyPoints(self, image, keypoints):
+        for keypoint in keypoints:
+            image = ImageManager.showKeyPoint(image, keypoint)
+
+        return image

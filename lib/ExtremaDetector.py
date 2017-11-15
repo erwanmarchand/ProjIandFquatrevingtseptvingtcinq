@@ -10,10 +10,10 @@ class ExtremaDetector:
     def differenceDeGaussienne(image, s, nb_octave, **kwargs):
         """
         Génère la pyramide des DoG d'une image
-        :param image: L'image originale
-        :param s: Le facteur s
-        :param nb_octave: Le nombre d'octave sur lesquelles on veut travailler
-        :return: (DoGs, sigmas)
+        :param image:       L'image originale
+        :param s:           Le facteur s
+        :param nb_octave:   Le nombre d'octave sur lesquelles on veut travailler
+        :return:            (DoGs, pyramide des octaves, liste des sigmas)
         """
         if image is None:
             raise Exception("Erreur : Aucune image envoyee")
@@ -48,12 +48,24 @@ class ExtremaDetector:
 
     @staticmethod
     def detectionPointsCles(DoGs, octaves, sigmas, seuil_contraste, r_courb_principale, resolution_octave):
+        """
+        Detecte les points clés d'une image
+        
+        :param DoGs:                Liste des DoGs pour une octave
+        :param octaves:             Liste des images d'une octave
+        :param sigmas:              Liste des sigmas (provenant de la convolution par une gaussienne)
+        :param seuil_contraste:     Seuil de contraste
+        :param r_courb_principale:  Rayon de courbure principal
+        :param resolution_octave:   Résolution de l'octave
+        :return:                    Liste des points clés
+        """
+
         # Quelques vérifications d'usage afin de garantir le bon déroulement de la méthode
         if len(DoGs) == 0:
-            raise "Erreur : Aucune image DoGs fournie en parametre"
+            raise("Erreur : Aucune image DoGs fournie en parametre")
 
         if len(DoGs) < 3:
-            raise "Erreur : Pas assez d'images DoGs fournies en paramètre (3 minimum)"
+            raise("Erreur : Pas assez d'images DoGs fournies en paramètre (3 minimum)")
 
         # Execution
         height, width = ImageManager.getDimensions(DoGs[0])
@@ -100,23 +112,22 @@ class ExtremaDetector:
             return realPoints
 
         def _assignOrientation(candidats):
-            points = []
+            realPoints = []
 
             VOISINAGE_COTE = 5  # Pour n, on va faire un carre de x-n:x+n, y-n:y+n
             # On creer le slice de l'histogramme
-            H_slice = np.linspace(0, 2 * np.pi, 36 + 1) # 37 valeurs, donc 36 intervalles
+            H_slice = np.linspace(0, 2 * np.pi, 36 + 1)  # 37 valeurs, donc 36 intervalles
 
             for c in candidats:
                 (x, y, i) = c
                 H = np.zeros(36)
 
-                # Selection des cotés du voisinage en faisant attention aux bords
+                # Selection des points du voisinage en faisant attention aux bords
                 xMax, yMax, xMin, yMin = min(height - 1, x + VOISINAGE_COTE), \
                                          min(width - 1, y + VOISINAGE_COTE), \
                                          max(1, x - VOISINAGE_COTE), \
                                          max(1, y - VOISINAGE_COTE)
 
-                base = octaves[i][xMin:xMax, yMin:yMax]
                 g, d, b, h = octaves[i][(xMin - 1):(xMax - 1), yMin:yMax], \
                              octaves[i][(xMin + 1):(xMax + 1), yMin:yMax], \
                              octaves[i][xMin:xMax, (yMin - 1):(yMax - 1)], \
@@ -126,16 +137,25 @@ class ExtremaDetector:
                 M = np.sqrt(np.power(d - g, 2) + np.power(b - h, 2))
                 A = np.arctan((b - h) / (d - g))
 
-                # Analyse des résultats, on applatit le slice de la matrice
+                # Analyse des résultats, on applatit le carré de matrice
                 Ms, As = M.flat, A.flat
 
-                for angle in As:
+                for k, angle in enumerate(As):
                     for si in range(36):
                         if angle <= H_slice[si + 1]:
-                            H[si] += 1
+                            H[si] += Ms[k]
+                            break
 
+                # On selectionne les angles ayant plus de 80% de la valeur maximale
+                mH, angles = np.max(H), []
+                for i, a in enumerate(H):
+                    if H[i] / mH >= 0.80:
+                        angles.append(a)
 
-            return candidats
+                for a in angles:
+                    realPoints.append((x, y, i, a))
+
+            return realPoints
 
         candidats = _detectionExtremums()
         ## BONUS EVENTUEL ICI
@@ -149,13 +169,13 @@ class ExtremaDetector:
     def showPyramid(pyramid, sigmas, **kwargs):
         """
         Open a window and show a Pyramid
-        :param pyramid: The pyramid we want to watch
-        :param sigmas: The different sigmas of the pyramid
+        :param pyramid:     The pyramid we want to watch
+        :param sigmas:      The different sigmas of the pyramid
         """
         nb_octave, nb_per_row = len(pyramid), len(pyramid[0])
 
         # Show pyramid
-        Log.info("Affichage d'une pyramide : " + kwargs.get("title", "noname"))
+        Log.info("Affichage d'une pyramide : " + kwargs.get("title", "NO_NAME"))
         for o in range(nb_octave):
             for k in range(nb_per_row):
                 plt.subplot(nb_octave, nb_per_row, (k + 1) + o * nb_per_row)

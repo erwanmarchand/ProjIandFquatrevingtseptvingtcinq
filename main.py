@@ -6,7 +6,7 @@ IMAGES_PATH = "images/"
 ORIGINAL_IMAGES_PATH = IMAGES_PATH + "original/"
 GENERATED_IMAGES_PATH = IMAGES_PATH + "generated/"
 DEBUG = True
-NAME_PICTURE = 'gauche.jpg'
+NAME_PICTURE = 'lena.jpg'
 
 s = 3
 octave = 3
@@ -14,6 +14,7 @@ octave = 3
 
 # Algorithm
 img = ImageManager.loadMatrix(ORIGINAL_IMAGES_PATH + NAME_PICTURE)
-ImageProcessor.findKeypoints(img, s, octave, verbose=DEBUG)
+keypoints = ImageProcessor.findKeypoints(img, s, octave, verbose=DEBUG)
+beacons = ImageProcessor.showKeyPoints(img, keypoints)
 
 
