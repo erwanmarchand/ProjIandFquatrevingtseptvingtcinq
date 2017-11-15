@@ -1,9 +1,12 @@
 # -*- coding: utf-8 -*-
 
 import cv2
+import matplotlib.pyplot as plt
+
 from lib.Filter import *
 
 GAUSSIAN_PARAMETER = 2
+
 
 class ImageManager:
     @staticmethod
@@ -15,8 +18,8 @@ class ImageManager:
 
     @staticmethod
     def normalizeImage(image):
-        if np.max(image) > 1: # On vérifie que l'image n'est pas déja normalisée
-            return image / 255.0
+        if np.max(image) > 1:  # On vérifie que l'image n'est pas déja normalisée
+            return image / np.max(image)
         else:
             return image
 
@@ -37,11 +40,25 @@ class ImageManager:
 
     @staticmethod
     def showKeyPoint(image, keypoint):
-        pass
+        BLUE = [255, 0, 0]
+
+        radius = keypoint[2] * 5
+        image = cv2.circle(image, (keypoint[0], keypoint[1]), int(radius), color=BLUE)
+        image = cv2.arrowedLine(image,
+                                (keypoint[0], keypoint[1]),
+                                (int(np.sin(keypoint[3]) * radius), int(np.cos(keypoint[3]) * radius)),
+                                BLUE)
+
+        return image
 
     @staticmethod
     def makeDifference(img1, img2):
         return img1 - img2
+
+    @staticmethod
+    def showImage(image, **kwargs):
+        plt.imshow(image, **kwargs)
+        plt.show()
 
     @staticmethod
     def getDimensions(image):
