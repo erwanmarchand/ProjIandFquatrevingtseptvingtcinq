@@ -44,30 +44,61 @@ class ExtremaDetector:
         if verbose:
             ExtremaDetector.showPyramid(doG, sigmas, title="Pyramide des DoGs")
 
-        return doG, sigmas
+        return doG, pyramid, sigmas
 
     @staticmethod
     def detectionPointsCles(DoGs, octaves, sigmas, seuil_contraste, r_courb_principale, resolution_octave):
+        # Quelques vérifications d'usage afin de garantir le bon déroulement de la méthode
+        if len(DoGs) == 0:
+            raise "Erreur : Aucune image DoGs fournie en parametre"
+
+        # Execution
+        width, height = ImageManager.getDimensions(DoGs[0])
+
         def _detectionExtremums():
             extremums = []
 
+            for i in range(len(DoGs[1:-1])):
+                # On fait une boucle sur l'ensemble des pixels, bords exclus, afin de ne pas avoir a faire du cas par cas
+                for x in range(1, height - 1):
+                    for y in range(1, width - 1):
+                        neighboors = []
+
+                        neighboors += [DoGs[i - 1][x - 1:x + 1, y - 1:y + 1]]
+                        neighboors += [DoGs[i][x - 1:x + 1, y - 1:y + 1]]
+                        neighboors += [DoGs[i + 1][x - 1:x + 1, y - 1:y + 1]]
+
+                        # Si le point est effectivement le maximum de la region, c'est un point candidat
+                        if DoGs[i][x, y] == np.max(neighboors):
+                            extremums.append((x, y, i))
+
             return extremums
 
-        def _corrigerPositionExtremum(extremum):
-            return extremum
 
-        def _filtrerPointsCandidats(candidats):
+        def _filtrerPointsContraste(candidats):
+            realPoints = []
+
+            for c in candidats:
+                (x, y, i) = c
+                if DoGs[i][x, y] > seuil_contraste:
+                    realPoints.append(c)
+
+            return realPoints
+
+        def _filtrerPointsArete(candidats):
             realPoints = candidats
+
+
+            # On calcul la Hessienne
 
             return realPoints
 
         candidats = _detectionExtremums()
-        for i, ext in candidats:
-            candidats[i] = _corrigerPositionExtremum(ext)
-        pointsCles = _filtrerPointsCandidats(candidats)
+        ## BONUS EVENTUEL ICI
+        candidats = _filtrerPointsContraste(candidats)
+        candidats = _filtrerPointsArete(candidats)
 
-        return pointsCles
-
+        return candidats
 
     @staticmethod
     def showPyramid(pyramid, sigmas, **kwargs):

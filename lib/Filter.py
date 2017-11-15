@@ -20,3 +20,10 @@ class Filter:
         matrix = matrix / som
 
         return matrix
+
+
+if __name__ == '__main__':
+    for p in range(6):
+        print("P = " + str(p))
+        print(Filter.createGaussianFilter(p, 1.6))
+        print("")
