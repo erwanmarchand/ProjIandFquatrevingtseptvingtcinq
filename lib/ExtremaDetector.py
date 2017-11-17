@@ -31,6 +31,10 @@ class ExtremaDetector:
             for k in range(nb_element):
                 pyramid[octave].append(ImageManager.applyGaussianFilter(octave_original, sigmas[k]))
 
+                #DEBUG
+                
+                #FIN DEBUG
+
         if show_images:
             ExtremaDetector.showPyramid(pyramid, sigmas, title="Pyramide des images filtrees par un filtre gaussien")
 
