@@ -28,11 +28,11 @@ class ImageProcessor:
             # On fait un rescale des points clés
             for kp in points:
                 try:
-                    (x, y, s, a) = kp
-                    rPoints.append((x * (2 ** i), y * (2 ** i), s, a))
+                    (x, y, j, a) = kp
+                    rPoints.append((x * (2 ** i), y * (2 ** i), sigmas[j], a))
                 except ValueError:
-                    (x, y, s) = kp
-                    rPoints.append((x * (2 ** i), y * (2 ** i), s, 0))
+                    (x, y, j) = kp
+                    rPoints.append((x * (2 ** i), y * (2 ** i), sigmas[j], 1))
 
             print(len(rPoints))
 
@@ -40,9 +40,25 @@ class ImageProcessor:
                 Log.debug("Nombre de points pour l'octave " + str(i) + " : " + str(len(rPoints)))
 
             plt.subplot("1"+str(len(octaves))+str(i))
-            i = ImageProcessor.showKeyPoints(image, rPoints)
-            plt.imshow(i)
+            img = ImageProcessor.showKeyPoints(image, rPoints)
+            plt.imshow(img, cmap="gray")
+            plt.title("Octave " + str(i))
+
+            realPoints.append(np.array(rPoints))
+
+        # Affichage des points par octaves
         plt.show()
+
+        # Concatenation des tableaux
+        Log.debug("Concaténation des tableaux de points clés")
+        keyPoints = np.array(realPoints).flat
+        keyPoints = np.unique(keyPoints)
+
+        img = ImageProcessor.showKeyPoints(image, keyPoints)
+        plt.imshow(img, cmap="gray")
+        plt.title("Points clés")
+        plt.show()
+
 
         exit(0)
         return realPoints

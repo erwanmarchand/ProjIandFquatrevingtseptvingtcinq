@@ -19,7 +19,7 @@ class ImageManager:
     @staticmethod
     def normalizeImage(image):
         if np.max(image) > 1:  # On vérifie que l'image n'est pas déja normalisée
-            return image / np.max(image)
+            return image / max(np.max(image), np.min(image))
         else:
             return image
 
@@ -35,19 +35,20 @@ class ImageManager:
 
     @staticmethod
     def applyGaussianFilter(image, sigma):
-        filter = Filter.createGaussianFilter(GAUSSIAN_PARAMETER, sigma)
+        filter = Filter.createGaussianFilter(int(sigma*3), sigma)
         return Filter.applyFilter(image, filter)
 
     @staticmethod
     def showKeyPoint(image, keypoint):
-        BLUE = [255, 0, 0]
+        radius = keypoint[2] * 10
 
-        radius = keypoint[2] * 5
-        image = cv2.circle(image, (keypoint[0], keypoint[1]), int(radius), color=BLUE)
-#        image = cv2.line(image,
-#                         (keypoint[0], keypoint[1]),
-#                         (int(np.sin(keypoint[3]) * radius), int(np.cos(keypoint[3]) * radius)),
-#                         color=BLUE)
+        COLOR = [(keypoint[2] * 1000) % 256, (keypoint[2] * 333) % 256, (keypoint[2] * 666) % 256]
+        image = cv2.circle(image, (keypoint[1], keypoint[0]), int(radius), color=COLOR)
+        image = cv2.line(image,
+                         (keypoint[1], keypoint[0]),
+                         (keypoint[1] + int(np.sin(keypoint[3]*np.pi/180) * radius),
+                           keypoint[0] + int(np.cos(keypoint[3]*np.pi/180) * radius)),
+                         color=COLOR)
 
         return image
 

@@ -6,8 +6,8 @@ import scipy.signal as signal
 
 class Filter:
     @staticmethod
-    def applyFilter(image, filter):
-        return signal.convolve2d(image, filter)
+    def applyFilter(image, filter, **kwargs):
+        return signal.convolve2d(image, filter, kwargs.get("mode", "same"), kwargs.get("boundary", "symm"))
 
     @staticmethod
     def createGaussianFilter(P, sigma):
