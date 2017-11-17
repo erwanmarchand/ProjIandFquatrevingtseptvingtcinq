@@ -82,14 +82,16 @@ class ExtremaDetector:
                 # On fait une boucle sur l'ensemble des pixels, bords exclus afin de ne pas avoir a faire du cas par cas
                 for x in range(1, height - 1):
                     for y in range(1, width - 1):
-                        maxNeighbours = []
+                        neighbours = []
 
-                        maxNeighbours += [np.max(DoGs[i - 1][x - 1:x + 2, y - 1:y + 2])]
-                        maxNeighbours += [np.max(DoGs[i][x - 1:x + 2, y - 1:y + 2])]
-                        maxNeighbours += [np.max(DoGs[i + 1][x - 1:x + 2, y - 1:y + 2])]
+                        neighbours += [DoGs[i - 1][x - 1:x + 2, y - 1:y + 2]]
+                        neighbours += [DoGs[i][x - 1:x + 2, y - 1:y + 2]]
+                        neighbours += [DoGs[i + 1][x - 1:x + 2, y - 1:y + 2]]
+
+                        neighbours = np.array(neighbours).flat
 
                         # Si le point est effectivement le maximum de la region, c'est un point candidat
-                        if DoGs[i][x, y] == np.max(maxNeighbours):
+                        if DoGs[i][x, y] == np.max(neighbours) or DoGs[i][x, y] == np.min(neighbours):
                             extremums.append((x, y, i))
 
             return extremums
