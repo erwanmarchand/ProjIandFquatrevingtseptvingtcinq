@@ -17,7 +17,7 @@ class ImageProcessor:
                     DoGs[i],
                     octaves[i],
                     sigmas,
-                    0.03,
+                    0.06,
                     0.6,
                     1 / (2 ** i)
             )
@@ -36,7 +36,5 @@ class ImageProcessor:
     def showKeyPoints(image, keypoints):
         for k, keypoint in enumerate(keypoints):
             image = ImageManager.showKeyPoint(image, keypoint)
-            if k > 200:
-                break
 
         return image

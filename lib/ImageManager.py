@@ -44,10 +44,10 @@ class ImageManager:
 
         radius = keypoint[2] * 5
         image = cv2.circle(image, (keypoint[0], keypoint[1]), int(radius), color=BLUE)
-        image = cv2.arrowedLine(image,
-                                (keypoint[0], keypoint[1]),
-                                (int(np.sin(keypoint[3]) * radius), int(np.cos(keypoint[3]) * radius)),
-                                BLUE)
+#        image = cv2.line(image,
+#                         (keypoint[0], keypoint[1]),
+#                         (int(np.sin(keypoint[3]) * radius), int(np.cos(keypoint[3]) * radius)),
+#                         color=BLUE)
 
         return image
 

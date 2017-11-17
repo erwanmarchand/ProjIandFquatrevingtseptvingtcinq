@@ -85,7 +85,7 @@ class ExtremaDetector:
                         maxNeighbours = []
 
                         maxNeighbours += [np.max(DoGs[i - 1][x - 1:x + 2, y - 1:y + 2])]
-                        maxNeighbours += [np.max(DoGs[i][x - 1:x + 2, y - 1:y + 1])]
+                        maxNeighbours += [np.max(DoGs[i][x - 1:x + 2, y - 1:y + 2])]
                         maxNeighbours += [np.max(DoGs[i + 1][x - 1:x + 2, y - 1:y + 2])]
 
                         # Si le point est effectivement le maximum de la region, c'est un point candidat
@@ -158,8 +158,13 @@ class ExtremaDetector:
 
         candidats = _detectionExtremums()
         ## BONUS EVENTUEL ICI
+        Log.info("\t" + str(len(candidats)) + " points avant le filtrage par contraste")
         candidats = _filtrerPointsContraste(candidats)
+
+        Log.info("\t" + str(len(candidats)) + " points avant le filtrage des arêtes")
         candidats = _filtrerPointsArete(candidats)
+
+        Log.info("\t" + str(len(candidats)) + " points avant l'assignation d'orientation")
         candidats = _assignOrientation(candidats)
 
         # Packaging des points clés

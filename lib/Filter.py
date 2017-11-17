@@ -24,6 +24,7 @@ class Filter:
 
 if __name__ == '__main__':
     for p in range(6):
-        print("P = " + str(p))
-        print(Filter.createGaussianFilter(p, 1.6))
+        filter = Filter.createGaussianFilter(p, 1.6)
+        print("P = " + str(p) + " || " + str(filter.shape[0]) + "x" + str(filter.shape[1]))
+        print(filter)
         print("")
