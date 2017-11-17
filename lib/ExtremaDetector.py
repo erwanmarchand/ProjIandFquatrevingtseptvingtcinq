@@ -99,7 +99,7 @@ class ExtremaDetector:
 
             for c in candidats:
                 (x, y, i) = c
-                if DoGsNormalized[i][x, y] > seuil_contraste:
+                if abs(DoGsNormalized[i][x, y]) > seuil_contraste:
                     realPoints.append(c)
 
             return realPoints
@@ -164,8 +164,8 @@ class ExtremaDetector:
         Log.info("\t" + str(len(candidats)) + " points avant le filtrage des arêtes")
         candidats = _filtrerPointsArete(candidats)
 
-        Log.info("\t" + str(len(candidats)) + " points avant l'assignation d'orientation")
-        candidats = _assignOrientation(candidats)
+        #Log.info("\t" + str(len(candidats)) + " points avant l'assignation d'orientation")
+        #candidats = _assignOrientation(candidats)
 
         # Packaging des points clés
         return candidats
