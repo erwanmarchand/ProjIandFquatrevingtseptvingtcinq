@@ -158,7 +158,7 @@ class ExtremaDetector:
                         angles.append(H_slice[k + 1])
 
                 for a in angles:
-                    realPoints.append((x, y, sigmas[i], a))
+                    realPoints.append((x, y, i, a))
 
             return realPoints
 
@@ -170,8 +170,8 @@ class ExtremaDetector:
         Log.info("\t" + str(len(candidats)) + " points avant le filtrage des arêtes")
         candidats = _filtrerPointsArete(candidats)
 
-        #Log.info("\t" + str(len(candidats)) + " points avant l'assignation d'orientation")
-        #candidats = _assignOrientation(candidats)
+        Log.info("\t" + str(len(candidats)) + " points avant l'assignation d'orientation")
+        candidats = _assignOrientation(candidats)
 
         # Packaging des points clés
         return candidats
