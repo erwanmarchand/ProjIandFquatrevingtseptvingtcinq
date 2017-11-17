@@ -13,9 +13,10 @@ NAME_PICTURE = 'lena.jpg'
 s = 3
 octave = 3
 
-
 # Algorithm
 img = ImageManager.loadMatrix(ORIGINAL_IMAGES_PATH + NAME_PICTURE)
+img = ImageManager.getOctave(img, -1)
+
 keypoints = ImageProcessor.findKeypoints(img, s, octave, verbose=DEBUG, show_images=SHOW_IMAGE)
 beacons = ImageProcessor.showKeyPoints(img, keypoints)
 
