@@ -107,9 +107,24 @@ class ExtremaDetector:
             return realPoints
 
         def _filtrerPointsArete(candidats):
-            realPoints = candidats
+            realPoints = []
 
             # On calcul la Hessienne
+            for c in candidats:
+                (x, y, i) = c
+                hessianxx = DoGsNormalized[i][x+1, y] + DoGsNormalized[i][x-1, y] - (2 * DoGsNormalized[i][x, y])
+                hessianxy = DoGsNormalized[i][x+1, y+1] - DoGsNormalized[i][x, y+1] - DoGsNormalized[i][x+1, y] + DoGsNormalized[i][x, y]
+                hessianyy = DoGsNormalized[i][x, y+1] + DoGsNormalized[i][x, y-1] - (2 * DoGsNormalized[i][x, y])
+
+                Tr = hessianxx + hessianyy
+                Det = (hessianxx * hessianyy) - (hessianxy * hessianxy)
+
+                rth = 10
+                R = Tr * Tr / Det
+                rapport = ((rth+1)^2)/rth
+
+                if R < rth :
+                    realPoints.append(c)
 
             return realPoints
 

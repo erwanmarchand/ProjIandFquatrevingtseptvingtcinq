@@ -25,7 +25,23 @@ for k, grad_k in enumerate(x_grad):
     for l, grad_kl in enumerate(tmp_grad):
         hessian[k, l, :, :] = grad_kl
 
+hessian2 = np.empty((img.shape[0]-2,img.shape[1]-2), dtype=img.dtype)
+
+for x in range(0, hessian2.shape[0]):
+    for y in range(0, hessian2.shape[1]):
+        hessian2[x][y] = img[x+2][y+1] + img[x][y+1] - (2*img[x+1][y+1])
+
+test1= hessian[0][0]
+test2= hessian[1][1]
+
+for x in range(0, hessian2.shape[0]):
+    for y in range(0, hessian2.shape[1]):
+        test1[x+1][y+1] = test1[x+1][y+1] - hessian2[x][y]
+        test2[x+1][y+1] = test2[x+1][y+1] - hessian2[x][y]
+
 ImageManager.showImage(hessian[0][0], cmap='gray')
-ImageManager.showImage(hessian[0][1], cmap='gray')
-ImageManager.showImage(hessian[1][0], cmap='gray')
-ImageManager.showImage(hessian[1][1], cmap='gray')
+#ImageManager.showImage(hessian[0][1], cmap='gray')
+#ImageManager.showImage(hessian[1][0], cmap='gray')
+#ImageManager.showImage(hessian[1][1], cmap='gray')
+ImageManager.showImage(test1, cmap='gray')
+ImageManager.showImage(test2, cmap='gray')
