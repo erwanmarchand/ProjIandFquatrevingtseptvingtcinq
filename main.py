@@ -22,4 +22,3 @@ keypoints = ImageProcessor.findKeypoints(img, s, octave, verbose=DEBUG, show_ima
 beacons = ImageProcessor.showKeyPoints(img, keypoints)
 
 ImageManager.showImage(beacons, cmap='gray')
-

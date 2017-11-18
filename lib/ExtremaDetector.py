@@ -31,10 +31,6 @@ class ExtremaDetector:
             for k in range(nb_element):
                 pyramid[octave].append(ImageManager.applyGaussianFilter(octave_original, sigmas[k]))
 
-                #DEBUG
-                
-                #FIN DEBUG
-
         if show_images:
             ExtremaDetector.showPyramid(pyramid, sigmas, title="Pyramide des images filtrees par un filtre gaussien")
 
@@ -158,7 +154,7 @@ class ExtremaDetector:
                         angles.append(H_slice[k + 1])
 
                 for a in angles:
-                    realPoints.append((x, y, i, a))
+                    realPoints.append((x, y, sigmas[i], a))
 
             return realPoints
 
@@ -170,8 +166,8 @@ class ExtremaDetector:
         Log.info("\t" + str(len(candidats)) + " points avant le filtrage des arêtes")
         candidats = _filtrerPointsArete(candidats)
 
-        Log.info("\t" + str(len(candidats)) + " points avant l'assignation d'orientation")
-        candidats = _assignOrientation(candidats)
+        #Log.info("\t" + str(len(candidats)) + " points avant l'assignation d'orientation")
+        #candidats = _assignOrientation(candidats)
 
         # Packaging des points clés
         return candidats

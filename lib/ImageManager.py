@@ -17,6 +17,10 @@ class ImageManager:
         return data
 
     @staticmethod
+    def writeImage(image, path):
+        cv2.imwrite(path,image)
+
+    @staticmethod
     def normalizeImage(image):
         if np.max(image) > 1:  # On vérifie que l'image n'est pas déja normalisée
             return image / max(np.max(image), np.min(image))
