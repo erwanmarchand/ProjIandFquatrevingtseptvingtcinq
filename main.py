@@ -19,6 +19,3 @@ img = ImageManager.getOctave(img, -1)
 
 # On applique l'algorithme
 keypoints = ImageProcessor.findKeypoints(img, s, octave, verbose=DEBUG, show_images=SHOW_IMAGE)
-beacons = ImageProcessor.showKeyPoints(img, keypoints)
-
-ImageManager.showImage(beacons, cmap='gray')

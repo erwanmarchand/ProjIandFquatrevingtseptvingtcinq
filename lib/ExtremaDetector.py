@@ -1,11 +1,17 @@
 # -*- coding: utf-8 -*-
 import matplotlib.pyplot as plt
+import copy
 
 from lib.ImageManager import *
 from lib.debug.Log import *
+from lib.analysis.Utils import *
+from lib.analysis.OctaveAnalyzer import *
 
 
 class ExtremaDetector:
+    def __init__(self):
+        pass
+
     @staticmethod
     def differenceDeGaussienne(image, s, nb_octave, **kwargs):
         """
@@ -32,7 +38,7 @@ class ExtremaDetector:
                 pyramid[octave].append(ImageManager.applyGaussianFilter(octave_original, sigmas[k]))
 
         if show_images:
-            ExtremaDetector.showPyramid(pyramid, sigmas, title="Pyramide des images filtrees par un filtre gaussien")
+            Utils.showPyramid(pyramid, sigmas, title="Pyramide des images filtrees par un filtre gaussien")
 
         # Make difference
         doG = [[] for k in range(nb_octave)]
@@ -42,21 +48,22 @@ class ExtremaDetector:
                 doG[octave].append(ImageManager.makeDifference(pyramid[octave][k + 1], pyramid[octave][k]))
 
         if show_images:
-            ExtremaDetector.showPyramid(doG, sigmas, title="Pyramide des DoGs")
+            Utils.showPyramid(doG, sigmas, title="Pyramide des DoGs")
 
         return doG, pyramid, sigmas
 
     @staticmethod
-    def detectionPointsCles(DoGs, octaves, sigmas, seuil_contraste, r_courb_principale, resolution_octave):
+    def detectionPointsCles(DoGs, octaves, sigmas, seuil_contraste, r_courb_principale, resolution_octave, octave_nb,
+                            **kwargs):
         """
         Detecte les points clés d'une image
-        
         :param DoGs:                Liste des DoGs pour une octave
         :param octaves:             Liste des images d'une octave
         :param sigmas:              Liste des sigmas (provenant de la convolution par une gaussienne)
         :param seuil_contraste:     Seuil de contraste
         :param r_courb_principale:  Rayon de courbure principal
         :param resolution_octave:   Résolution de l'octave
+        :param octave_nb:           Numéro de l'octave
         :return:                    Liste des points clés
         """
 
@@ -112,25 +119,25 @@ class ExtremaDetector:
             # On calcul la Hessienne
             for c in candidats:
                 (x, y, i) = c
-                hessianxx = DoGsNormalized[i][x+1, y] + DoGsNormalized[i][x-1, y] - (2 * DoGsNormalized[i][x, y])
-                hessianxy = DoGsNormalized[i][x+1, y+1] - DoGsNormalized[i][x, y+1] - DoGsNormalized[i][x+1, y] + DoGsNormalized[i][x, y]
-                hessianyy = DoGsNormalized[i][x, y+1] + DoGsNormalized[i][x, y-1] - (2 * DoGsNormalized[i][x, y])
+                hessianxx = DoGs[i][x + 1, y] + DoGs[i][x - 1, y] - (2 * DoGs[i][x, y])
+                hessianxy = DoGs[i][x + 1, y + 1] - DoGs[i][x, y + 1] - DoGs[i][
+                    x + 1, y] + DoGs[i][x, y]
+                hessianyy = DoGs[i][x, y + 1] + DoGs[i][x, y - 1] - (2 * DoGs[i][x, y])
 
                 Tr = hessianxx + hessianyy
-                Det = (hessianxx * hessianyy) - (hessianxy * hessianxy)
+                Det = (hessianxx * hessianyy) - (hessianxy ** 2)
 
-                rth = 10
-                R = Tr * Tr / Det
-                rapport = ((rth+1)^2)/rth
+                R = (Tr ** 2) / Det
+                rapport = ((r_courb_principale + 1) ^ 2) / r_courb_principale
 
-                if R < rth :
+                if R < rapport:
                     realPoints.append(c)
 
             return realPoints
 
         def _assignOrientation(candidats):
             realPoints = []
-            VOISINAGE_COTE = 5  # Pour n, on va faire un carre de x-n:x+n, y-n:y+n
+            VOISINAGE_COTE = 7  # Pour n, on va chercher dans un voisinage de x-n:x+n, y-n:y+n pixels (n+1)**2
             # On creer le slice de l'histogramme
             H_slice = np.linspace(0, 2 * np.pi, 36 + 1)  # 37 valeurs, donc 36 intervalles
 
@@ -169,39 +176,40 @@ class ExtremaDetector:
                         angles.append(H_slice[k + 1])
 
                 for a in angles:
-                    realPoints.append((x, y, sigmas[i], a))
+                    realPoints.append((x, y, i, a))
 
             return realPoints
 
+        # On initialise la tableau d'analyse pour l'analyseur
+        pyramid_analyzer = kwargs.get("pyramid_analyzer", None)
+        analyseur = OctaveAnalyzer(octave_nb) if pyramid_analyzer else None
+        elements = {} if analyseur else None
+
+        # Detection des extremums
         candidats = _detectionExtremums()
+        elements["kp_after_extremum_detection"] = copy.deepcopy(candidats) if analyseur else []
+
         ## BONUS EVENTUEL ICI
+
+        # Filtrage des points de faible contrastes
         Log.info("\t" + str(len(candidats)) + " points avant le filtrage par contraste")
         candidats = _filtrerPointsContraste(candidats)
+        elements["kp_after_contrast_limitation"] = copy.deepcopy(candidats) if analyseur else []
 
+        # Filtrage des points sur les arêtes
         Log.info("\t" + str(len(candidats)) + " points avant le filtrage des arêtes")
         candidats = _filtrerPointsArete(candidats)
+        elements["kp_after_hessian_filter"] = copy.deepcopy(candidats) if analyseur else []
 
-        #Log.info("\t" + str(len(candidats)) + " points avant l'assignation d'orientation")
-        #candidats = _assignOrientation(candidats)
+        # Assignation de l'orientation des points
+        Log.info("\t" + str(len(candidats)) + " points avant l'assignation d'orientation")
+        candidats = _assignOrientation(candidats)
+        elements["kp_after_orientation_assignation"] = copy.deepcopy(candidats) if analyseur else []
 
-        # Packaging des points clés
+        # Packaging des points clés et des outils d'analyse
+        if analyseur:
+            analyseur.finalKeypoints = copy.deepcopy(candidats)
+            analyseur.elements = elements
+            pyramid_analyzer.addOctaveAnalyzer(analyseur)
+
         return candidats
-
-    @staticmethod
-    def showPyramid(pyramid, sigmas, **kwargs):
-        """
-        Open a window and show a Pyramid
-        :param pyramid:     The pyramid we want to watch
-        :param sigmas:      The different sigmas of the pyramid
-        """
-        nb_octave, nb_per_row = len(pyramid), len(pyramid[0])
-
-        # Show pyramid
-        Log.debug("Affichage d'une pyramide : " + kwargs.get("title", "NO_NAME"))
-        for o in range(nb_octave):
-            for k in range(nb_per_row):
-                plt.subplot(nb_octave, nb_per_row, (k + 1) + o * nb_per_row)
-                plt.title(str(o + 1) + " || " + str(round(sigmas[k], 4)))
-                plt.imshow(pyramid[o][k], cmap=kwargs.get("cmap", 'gray'))
-
-        plt.show()
