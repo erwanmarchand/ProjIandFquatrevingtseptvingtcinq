@@ -23,5 +23,3 @@ class Utils:
                 plt.subplot(nb_octave, nb_per_row, (k + 1) + o * nb_per_row)
                 plt.title(str(o + 1) + " || " + str(round(sigmas[k], 4)))
                 plt.imshow(pyramid[o][k], cmap=kwargs.get("cmap", 'gray'))
-
-        plt.show()

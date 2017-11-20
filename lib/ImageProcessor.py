@@ -18,10 +18,12 @@ class ImageProcessor:
         realPoints = []
 
         # Chargement de l'analyseur
-        pyramidAnalyzer = PyramidAnalyzer(image)
-        pyramidAnalyzer.sigmas = sigmas
-        pyramidAnalyzer.dogPyramid = DoGs
-        pyramidAnalyzer.imagePyramid = octaves
+        pyramidAnalyzer = kwargs.get("pyramid_analyzer", None)
+
+        if pyramidAnalyzer:
+            pyramidAnalyzer.sigmas = sigmas
+            pyramidAnalyzer.dogPyramid = DoGs
+            pyramidAnalyzer.imagePyramid = octaves
 
         for i in range(len(octaves)):
             if kwargs.get("verbose", False):
@@ -31,7 +33,7 @@ class ImageProcessor:
                     DoGs[i],
                     octaves[i],
                     sigmas,
-                    0.03,
+                    0.08,
                     10,
                     1 / (2 ** i),
                     i,
@@ -50,7 +52,8 @@ class ImageProcessor:
             realPoints = Utils.concatenateKeyPoints(octavePoints, realPoints)
 
         # Chargement de l'analyseur et lancement de l'analyse
-        pyramidAnalyzer.keypoints = realPoints
-        pyramidAnalyzer.analyze()
+        if pyramidAnalyzer:
+            pyramidAnalyzer.keypoints = realPoints
+            pyramidAnalyzer.analyze()
 
         return realPoints

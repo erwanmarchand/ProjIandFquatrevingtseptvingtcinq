@@ -187,24 +187,30 @@ class ExtremaDetector:
 
         # Detection des extremums
         candidats = _detectionExtremums()
-        elements["kp_after_extremum_detection"] = copy.deepcopy(candidats) if analyseur else []
+        if analyseur:
+            elements["kp_after_extremum_detection"] = copy.deepcopy(candidats)
 
         ## BONUS EVENTUEL ICI
 
         # Filtrage des points de faible contrastes
         Log.info("\t" + str(len(candidats)) + " points avant le filtrage par contraste")
         candidats = _filtrerPointsContraste(candidats)
-        elements["kp_after_contrast_limitation"] = copy.deepcopy(candidats) if analyseur else []
+        if analyseur:
+            elements["kp_after_contrast_limitation"] = copy.deepcopy(candidats)
 
         # Filtrage des points sur les arêtes
         Log.info("\t" + str(len(candidats)) + " points avant le filtrage des arêtes")
         candidats = _filtrerPointsArete(candidats)
-        elements["kp_after_hessian_filter"] = copy.deepcopy(candidats) if analyseur else []
+        if analyseur:
+            elements["kp_after_hessian_filter"] = copy.deepcopy(candidats)
 
         # Assignation de l'orientation des points
         Log.info("\t" + str(len(candidats)) + " points avant l'assignation d'orientation")
         candidats = _assignOrientation(candidats)
-        elements["kp_after_orientation_assignation"] = copy.deepcopy(candidats) if analyseur else []
+        if analyseur:
+            elements["kp_after_orientation_assignation"] = copy.deepcopy(candidats)
+
+
 
         # Packaging des points clés et des outils d'analyse
         if analyseur:

@@ -10,9 +10,8 @@ GAUSSIAN_PARAMETER = 2
 
 class ImageManager:
     @staticmethod
-    def loadMatrix(path, **kwargs):
-        flag = kwargs.get('flag', cv2.IMREAD_GRAYSCALE)
-        data = cv2.imread(path, flag)
+    def loadMatrix(path, *args):
+        data = cv2.imread(path, *args)
 
         return data
 
