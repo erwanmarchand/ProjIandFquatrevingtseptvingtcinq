@@ -14,6 +14,7 @@ class ImageProcessor:
     @staticmethod
     def findKeypoints(image, s, nb_octaves, **kwargs):
         # On construit la pyramide des gaussiennes
+        Log.debug("Construction de la pyramide des DoG")
         DoGs, octaves, sigmas = ExtremaDetector.differenceDeGaussienne(image, s, nb_octaves, **kwargs)
         realPoints = []
 
@@ -44,6 +45,10 @@ class ImageProcessor:
             # On fait un rescale des points clés
             octavePoints = Utils.adaptKeypoints(points, i)
             octavePoints = Utils.adaptSigmas(octavePoints, sigmas)
+
+            for elt in octavePoints:
+                print(elt)
+            exit(0)
 
             if kwargs.get("verbose", False):
                 Log.debug("Nombre de points pour l'octave " + str(i) + " : " + str(len(octavePoints)))

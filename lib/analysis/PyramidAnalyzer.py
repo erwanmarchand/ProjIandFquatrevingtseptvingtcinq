@@ -2,15 +2,18 @@
 from lib.ImageManager import *
 from lib.analysis.OctaveAnalyzer import *
 from lib.Utils import *
+from lib.debug.Log import *
+
 import lib.analysis.Utils as UtilsAnalysis
 
 import os
 
+DPI = 800
 
 class PyramidAnalyzer:
     def __init__(self, outpath="out/"):
         self.outpath = outpath
-        self.orginalPicture = None
+        self.originalPicture = None
         self.greyscalePicture = None
         self.remasteredPicture = None
 
@@ -22,15 +25,6 @@ class PyramidAnalyzer:
 
         if not os.path.exists(outpath):
             # On creer le dossier de sortie si il n'existe pas
-            os.makedirs(outpath)
-        else:
-            # Si il existe, on le vide
-            for root, dirs, files in os.walk(outpath, topdown=False):
-                for name in files:
-                    os.remove(os.path.join(root, name))
-                for name in dirs:
-                    os.rmdir(os.path.join(root, name))
-            os.rmdir(outpath)
             os.makedirs(outpath)
 
     def setImagePyramid(self, pyramid):
@@ -47,10 +41,13 @@ class PyramidAnalyzer:
 
     def analyze(self):
         def savePyramids():
+            Log.debug("Génération de l'image pour la pyramide des gaussiennes")
             UtilsAnalysis.Utils.showPyramid(self.imagePyramid, self.sigmas)
-            plt.savefig(self.outpath + "images_pyramid.png")
+            plt.savefig(self.outpath + "images_pyramid.jpg", format='jpg', dpi=DPI)
+
+            Log.debug("Génération de l'image pour la pyramide des différences de gaussiennes")
             UtilsAnalysis.Utils.showPyramid(self.dogPyramid, self.sigmas)
-            plt.savefig(self.outpath + "dogs_pyramid.png")
+            plt.savefig(self.outpath + "dogs_pyramid.jpg", format='jpg', dpi=DPI)
 
         def saveCandidats():
             if len(self.octavesAnalyzers) == 0:
@@ -65,23 +62,25 @@ class PyramidAnalyzer:
 
                     candidates = oa.elements[p]
                     candidates = Utils.adaptKeypoints(candidates, i)
+                    candidates = Utils.adaptSigmas(candidates, self.sigmas)
 
                     plt.subplot("1" + str(len(self.octavesAnalyzers)) + str(i))
-                    img = PyramidAnalyzer.showKeyPoints(self.orginalPicture, candidates)
-                    plt.imshow(img, cmap="gray")
+                    img = PyramidAnalyzer.showKeyPoints(self.originalPicture, candidates)
+                    plt.imshow(img)
                     plt.title("Octave " + str(i))
 
-                plt.savefig(self.outpath + p)
+                plt.savefig(self.outpath + p + ".jpg", format='jpg', dpi=DPI)
 
         def saveOctaves():
-            for i, oa in enumerate(self.octavesAnalyzers):
+            for oa in self.octavesAnalyzers:
+                i = oa.octaveNb
                 plt.subplot("1" + str(len(self.octavesAnalyzers)) + str(i))
-                img = PyramidAnalyzer.showKeyPoints(self.orginalPicture, oa.finalKeypoints)
-                plt.imshow(img, cmap="gray")
+                img = PyramidAnalyzer.showKeyPoints(self.originalPicture, oa.finalKeypoints)
+                plt.imshow(img)
                 plt.title("Octave " + str(i))
 
             # Affichage des points par octaves
-            plt.savefig(self.outpath + "final_octaves.png")
+            plt.savefig(self.outpath + "final_octaves.jpg", format='jpg', dpi=DPI)
 
         # Lancement de l'analyse
         savePyramids()

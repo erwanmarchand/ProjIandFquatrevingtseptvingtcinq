@@ -25,7 +25,7 @@ class ExtremaDetector:
             raise Exception("Erreur : Aucune image envoyee")
 
         nb_element = s + 3
-        verbose, show_images = kwargs.get('verbose', False), kwargs.get('show_images', False)
+        verbose = kwargs.get('verbose', False)
 
         # Construction de la pyramide de gaussiennes
         sigmas = [1.6 * 2 ** (float(k) / float(s)) for k in range(nb_element)]
@@ -37,18 +37,12 @@ class ExtremaDetector:
             for k in range(nb_element):
                 pyramid[octave].append(ImageManager.applyGaussianFilter(octave_original, sigmas[k]))
 
-        if show_images:
-            Utils.showPyramid(pyramid, sigmas, title="Pyramide des images filtrees par un filtre gaussien")
-
         # Make difference
         doG = [[] for k in range(nb_octave)]
 
         for octave in range(nb_octave):
             for k in range(nb_element - 1):
                 doG[octave].append(ImageManager.makeDifference(pyramid[octave][k + 1], pyramid[octave][k]))
-
-        if show_images:
-            Utils.showPyramid(doG, sigmas, title="Pyramide des DoGs")
 
         return doG, pyramid, sigmas
 

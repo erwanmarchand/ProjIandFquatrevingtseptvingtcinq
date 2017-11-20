@@ -22,7 +22,7 @@ class Utils:
                 rPoints.append((x * (2 ** octave_nb), y * (2 ** octave_nb), j, a))
             except ValueError:
                 (x, y, j) = kp
-                rPoints.append((x * (2 ** octave_nb), y * (2 ** octave_nb), j, 1))
+                rPoints.append((x * (2 ** octave_nb), y * (2 ** octave_nb), j, None))
 
         return rPoints
 
