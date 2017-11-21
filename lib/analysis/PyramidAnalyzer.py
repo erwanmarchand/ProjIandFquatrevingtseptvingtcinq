@@ -101,7 +101,7 @@ class PyramidAnalyzer:
                 plt.subplot("1" + str(len(self.octavesAnalyzers)) + str(i))
                 img = PyramidAnalyzer.showKeyPoints(copy.deepcopy(self.originalPicture), candidates)
                 plt.imshow(img)
-                plt.title("Octave " + str(i + 1))
+                plt.title("Octave " + str(i + 1) + " - " + str(len(candidates)))
 
             plt.savefig(self.outpath + ph + "." + EXTENSION, format=EXTENSION, dpi=DPI)
             plt.clf()
@@ -116,7 +116,7 @@ class PyramidAnalyzer:
             plt.subplot("1" + str(len(self.octavesAnalyzers)) + str(i))
             img = PyramidAnalyzer.showKeyPoints(copy.deepcopy(self.originalPicture), oa.finalKeypoints)
             plt.imshow(img)
-            plt.title("Octave " + str(i + 1))
+            plt.title("Octave " + str(i + 1) + " - " + str(len(oa.finalKeypoints)))
 
         # Affichage des points par octaves
         plt.savefig(self.outpath + "final_octaves." + EXTENSION, format=EXTENSION, dpi=DPI)
