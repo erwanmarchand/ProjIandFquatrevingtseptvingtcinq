@@ -7,6 +7,7 @@ from lib.debug.Log import *
 import lib.analysis.Utils as UtilsAnalysis
 
 import os
+import copy
 
 DPI = 800
 EXTENSION = "png"
@@ -44,12 +45,16 @@ class PyramidAnalyzer:
         functions = [
             self.saveCandidats,
             self.savePyramids,
-            self.saveOctaves
+            self.saveOctaves,
+            self.generateGraph
         ]
 
         # Lancement de l'analyse
+        i = 1
         for f in functions:
-            f()
+            i = f(i)
+            plt.clf()
+            plt.cla()
 
     @staticmethod
     def showKeyPoints(image, keypoints):
@@ -58,48 +63,67 @@ class PyramidAnalyzer:
 
         return image
 
-    def savePyramids(self):
+    def savePyramids(self, fi):
+        plt.figure(fi + 1)
         Log.debug("Génération de l'image pour la pyramide des gaussiennes")
         UtilsAnalysis.Utils.showPyramid(self.imagePyramid, self.sigmas)
         plt.savefig(self.outpath + "images_pyramid." + EXTENSION, format=EXTENSION, dpi=DPI)
-        plt.close()
+        plt.clf()
+        plt.cla()
 
+        plt.figure(fi + 2)
         Log.debug("Génération de l'image pour la pyramide des différences de gaussiennes")
         UtilsAnalysis.Utils.showPyramid(self.dogPyramid, self.sigmas)
         plt.savefig(self.outpath + "dogs_pyramid." + EXTENSION, format=EXTENSION, dpi=DPI)
-        plt.close()
+        plt.clf()
+        plt.cla()
 
-    def saveCandidats(self):
+        return fi + 2
+
+    def saveCandidats(self, fi):
         if len(self.octavesAnalyzers) == 0:
             raise Exception("Aucun analyseur d'octave trouvé")
 
-        phases = self.octavesAnalyzers[0].elements.keys()
+        for ph in self.octavesAnalyzers[0].elements.keys():
+            # Mise a jour du compteur de figure
+            fi = fi + 1
 
-        for p in phases:
-            Log.debug("Génération de l'image pour : " + p)
+            # Démarrage de l'analyse
+            Log.debug("Génération de l'image pour : " + ph)
+            plt.figure(fi)
             for oa in self.octavesAnalyzers:
                 i = oa.octaveNb
 
-                candidates = oa.elements[p]
+                candidates = oa.elements[ph]
                 candidates = Utils.adaptKeypoints(candidates, i)
                 candidates = Utils.adaptSigmas(candidates, self.sigmas)
 
                 plt.subplot("1" + str(len(self.octavesAnalyzers)) + str(i))
-                img = PyramidAnalyzer.showKeyPoints(self.originalPicture, candidates)
+                img = PyramidAnalyzer.showKeyPoints(copy.deepcopy(self.originalPicture), candidates)
                 plt.imshow(img)
-                plt.title("Octave " + str(i))
+                plt.title("Octave " + str(i + 1))
 
-            plt.savefig(self.outpath + p + "." + EXTENSION, format=EXTENSION, dpi=DPI)
-            plt.close()
+            plt.savefig(self.outpath + ph + "." + EXTENSION, format=EXTENSION, dpi=DPI)
+            plt.clf()
+            plt.cla()
 
-    def saveOctaves(self):
+        return fi
+
+    def saveOctaves(self, fi):
+        plt.figure(fi + 1)
         for oa in self.octavesAnalyzers:
             i = oa.octaveNb
             plt.subplot("1" + str(len(self.octavesAnalyzers)) + str(i))
-            img = PyramidAnalyzer.showKeyPoints(self.originalPicture, oa.finalKeypoints)
+            img = PyramidAnalyzer.showKeyPoints(copy.deepcopy(self.originalPicture), oa.finalKeypoints)
             plt.imshow(img)
-            plt.title("Octave " + str(i))
+            plt.title("Octave " + str(i + 1))
 
         # Affichage des points par octaves
         plt.savefig(self.outpath + "final_octaves." + EXTENSION, format=EXTENSION, dpi=DPI)
-        plt.close()
+        plt.clf()
+        plt.cla()
+
+        return fi + 1
+
+    def generateGraph(self, i):
+        return i + 1
