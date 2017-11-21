@@ -44,7 +44,7 @@ class ImageManager:
 
     @staticmethod
     def showKeyPoint(image, keypoint):
-        radius = keypoint[2] ** 1.5
+        radius = keypoint[2] * 10
 
         COLOR = [(keypoint[2] * 1000) % 256, (keypoint[2] * 333) % 256, (keypoint[2] * 666) % 256]
         image = cv2.circle(image, (keypoint[1], keypoint[0]), int(radius), color=COLOR)
@@ -52,8 +52,8 @@ class ImageManager:
         if keypoint[3] is not None:
             image = cv2.line(image,
                              (keypoint[1], keypoint[0]),
-                             (keypoint[1] + int(np.sin(keypoint[3] * np.pi / 180) * radius),
-                              keypoint[0] + int(np.cos(keypoint[3] * np.pi / 180) * radius)),
+                             (keypoint[1] + int(np.sin(keypoint[3]) * radius),
+                              keypoint[0] + int(np.cos(keypoint[3]) * radius)),
                              color=COLOR)
 
         return image
