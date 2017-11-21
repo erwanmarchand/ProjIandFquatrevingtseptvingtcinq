@@ -7,9 +7,6 @@ from lib.debug.Log import *
 from lib.analysis.Utils import *
 from lib.analysis.OctaveAnalyzer import *
 
-EPSILON = 0.00001
-
-
 class ExtremaDetector:
     def __init__(self):
         pass
@@ -154,10 +151,10 @@ class ExtremaDetector:
 
                 # Calcul des amplitude des gradients et de l'orientation
                 M = np.sqrt(np.power(d - g, 2) + np.power(b - h, 2))
-                A = np.arctan((b - h) / (d - g + EPSILON))  # On ajoute epsilon pour eviter les divisions par 0
+                A = np.arctan2((d - g), (b - h))  # On utilise atan2 comme spécifié dans l'article en anglais
 
                 # Analyse des résultats, on applatit le carré de matrice
-                Ms, As = M.flat, (np.array(A.flat) + 2 * np.pi) % 2 * np.pi
+                Ms, As = M.flat, A.flat
 
                 for k, angle in enumerate(As):
                     for si in range(36):
