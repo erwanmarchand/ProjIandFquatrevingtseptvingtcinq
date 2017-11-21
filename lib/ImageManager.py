@@ -49,7 +49,13 @@ class ImageManager:
         COLOR = [(keypoint[2] * 1000) % 256, (keypoint[2] * 333) % 256, (keypoint[2] * 666) % 256]
         image = cv2.circle(image, (keypoint[1], keypoint[0]), int(radius), color=COLOR)
 
-        if keypoint[3] is not None:
+        # On dessine la fleche représentant l'orientation du point clé
+        try:
+            kp3 = keypoint[3]
+        except IndexError:
+            kp3 = None
+
+        if kp3 is not None:
             image = cv2.line(image,
                              (keypoint[1], keypoint[0]),
                              (keypoint[1] + int(np.sin(keypoint[3]) * radius),
