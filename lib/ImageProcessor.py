@@ -46,9 +46,6 @@ class ImageProcessor:
             octavePoints = Utils.adaptKeypoints(points, i)
             octavePoints = Utils.adaptSigmas(octavePoints, sigmas)
 
-            for elt in octavePoints:
-                print(elt)
-            exit(0)
 
             if kwargs.get("verbose", False):
                 Log.debug("Nombre de points pour l'octave " + str(i) + " : " + str(len(octavePoints)))

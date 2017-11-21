@@ -44,10 +44,12 @@ class PyramidAnalyzer:
             Log.debug("Génération de l'image pour la pyramide des gaussiennes")
             UtilsAnalysis.Utils.showPyramid(self.imagePyramid, self.sigmas)
             plt.savefig(self.outpath + "images_pyramid.jpg", format='jpg', dpi=DPI)
+            plt.close()
 
             Log.debug("Génération de l'image pour la pyramide des différences de gaussiennes")
             UtilsAnalysis.Utils.showPyramid(self.dogPyramid, self.sigmas)
             plt.savefig(self.outpath + "dogs_pyramid.jpg", format='jpg', dpi=DPI)
+            plt.close()
 
         def saveCandidats():
             if len(self.octavesAnalyzers) == 0:
@@ -70,6 +72,7 @@ class PyramidAnalyzer:
                     plt.title("Octave " + str(i))
 
                 plt.savefig(self.outpath + p + ".jpg", format='jpg', dpi=DPI)
+                plt.close()
 
         def saveOctaves():
             for oa in self.octavesAnalyzers:
@@ -81,6 +84,7 @@ class PyramidAnalyzer:
 
             # Affichage des points par octaves
             plt.savefig(self.outpath + "final_octaves.jpg", format='jpg', dpi=DPI)
+            plt.close()
 
         # Lancement de l'analyse
         savePyramids()
