@@ -152,6 +152,7 @@ class ExtremaDetector:
                 # Calcul des amplitude des gradients et de l'orientation
                 M = np.sqrt(np.power(d - g, 2) + np.power(b - h, 2))
                 A = np.arctan2((d - g), (b - h))  # On utilise atan2 comme spécifié dans l'article en anglais
+                A = (A + 2 * np.pi) % (2 * np.pi)
 
                 # Analyse des résultats, on applatit le carré de matrice
                 Ms, As = M.flat, A.flat

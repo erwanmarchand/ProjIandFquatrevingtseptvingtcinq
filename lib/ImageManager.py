@@ -58,8 +58,8 @@ class ImageManager:
         if kp3 is not None:
             image = cv2.line(image,
                              (keypoint[1], keypoint[0]),
-                             (keypoint[1] + int(np.sin(keypoint[3]) * radius),
-                              keypoint[0] + int(np.cos(keypoint[3]) * radius)),
+                             (keypoint[1] + int(np.cos(keypoint[3]) * radius),
+                              keypoint[0] - int(np.sin(keypoint[3]) * radius)),
                              color=COLOR)
 
         return image
