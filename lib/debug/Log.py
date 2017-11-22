@@ -36,7 +36,7 @@ class Log:
             encoding = stream.encoding
             msg = msg.encode(encoding, "backslashreplace").decode(encoding)
 
-        stream.write(CSI + COLOR + '[' + str(time.clock()) + ']' + CSI + "0m" + " %s\n" % msg)
+        stream.write(CSI + COLOR + '[' + str(round(time.clock(), 2)) + ']' + CSI + "0m" + " %s\n" % msg)
         stream.flush()
 
     @staticmethod

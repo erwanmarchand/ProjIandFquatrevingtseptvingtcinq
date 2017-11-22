@@ -28,7 +28,7 @@ class ImageProcessor:
 
         for i in range(len(octaves)):
             if kwargs.get("verbose", False):
-                Log.debug("Debut de l'analyse de l'octave " + str(i))
+                Log.debug("Debut de l'analyse de l'octave " + str(i + 1))
 
             points = ExtremaDetector.detectionPointsCles(
                     DoGs[i],
@@ -43,12 +43,15 @@ class ImageProcessor:
             )
 
             # On fait un rescale des points clés
+            Log.info("\t" + "Rescale des points clés")
             octavePoints = Utils.adaptKeypoints(points, i)
+
+            Log.info("\t" + "Remplacement des sigmas par leur valeurs")
             octavePoints = Utils.adaptSigmas(octavePoints, sigmas)
 
 
             if kwargs.get("verbose", False):
-                Log.debug("Nombre de points pour l'octave " + str(i) + " : " + str(len(octavePoints)))
+                Log.debug("Nombre de points pour l'octave " + str(i + 1) + " : " + str(len(octavePoints)))
 
             # On ajoute les nouveaux points clés
             realPoints = Utils.concatenateKeyPoints(octavePoints, realPoints)

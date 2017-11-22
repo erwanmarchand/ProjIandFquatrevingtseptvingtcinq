@@ -46,7 +46,8 @@ class PyramidAnalyzer:
             self.saveCandidats,
             self.savePyramids,
             self.saveOctaves,
-            self.generateGraph
+            self.generateGraph,
+            self.saveFinalKeypoints
         ]
 
         # Lancement de l'analyse
@@ -110,16 +111,38 @@ class PyramidAnalyzer:
         return fi
 
     def saveOctaves(self, fi):
+        Log.debug("Génération de l'image finale pour chaque octave")
         plt.figure(fi + 1)
         for oa in self.octavesAnalyzers:
             i = oa.octaveNb
             plt.subplot("1" + str(len(self.octavesAnalyzers)) + str(i))
-            img = PyramidAnalyzer.showKeyPoints(copy.deepcopy(self.originalPicture), oa.finalKeypoints)
+
+            candidates = oa.finalKeypoints
+            candidates = Utils.adaptKeypoints(candidates, i)
+            candidates = Utils.adaptSigmas(candidates, self.sigmas)
+
+            img = PyramidAnalyzer.showKeyPoints(copy.deepcopy(self.originalPicture), candidates)
             plt.imshow(img)
             plt.title("Octave " + str(i + 1) + " - " + str(len(oa.finalKeypoints)))
 
         # Affichage des points par octaves
         plt.savefig(self.outpath + "final_octaves." + EXTENSION, format=EXTENSION, dpi=DPI)
+        plt.clf()
+        plt.cla()
+
+        return fi + 1
+
+    def saveFinalKeypoints(self, fi):
+        Log.debug("Génération de l'image finale des keypoints")
+        plt.figure(fi + 1)
+
+        candidates = self.keypoints
+        img = PyramidAnalyzer.showKeyPoints(copy.deepcopy(self.originalPicture), candidates)
+        plt.imshow(img)
+        plt.title("Keypoints - " + str(len(oa.finalKeypoints)))
+
+        # Affichage des points par octaves
+        plt.savefig(self.outpath + "final." + EXTENSION, format=EXTENSION, dpi=DPI)
         plt.clf()
         plt.cla()
 

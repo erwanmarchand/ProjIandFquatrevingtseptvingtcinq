@@ -27,6 +27,7 @@ class ExtremaDetector:
         verbose = kwargs.get('verbose', False)
 
         # Construction de la pyramide de gaussiennes
+        Log.debug('\t' + "Génération de la pyramide de Gaussiennes")
         sigmas = [1.6 * 2 ** (float(k) / float(s)) for k in range(nb_element)]
         pyramid = [[] for k in range(nb_octave)]
 
@@ -36,7 +37,8 @@ class ExtremaDetector:
             for k in range(nb_element):
                 pyramid[octave].append(ImageManager.applyGaussianFilter(octave_original, sigmas[k]))
 
-        # Make difference
+        # Generation de la pyramide des différences
+        Log.debug('\t' + "Génération de la pyramide des différences de Gaussiennes")
         doG = [[] for k in range(nb_octave)]
 
         for octave in range(nb_octave):
@@ -60,7 +62,7 @@ class ExtremaDetector:
         :return:                    Liste des points clés
         """
 
-        # Quelques vérifications d'usage afin de garantir le bon déroulement de la méthode
+        # Quelques vérifications d'usages afin de garantir le bon déroulement de la méthode
         if len(DoGs) == 0:
             raise ("Erreur : Aucune image DoGs fournie en parametre")
 
@@ -76,9 +78,11 @@ class ExtremaDetector:
             DoGsNormalized.append(ImageManager.normalizeImage(DoG))
 
         def _detectionExtremums():
+            Log.debug('\t' + "Demarrage de la détéction des extremums")
             extremums = []
 
-            for i in range(len(DoGs[1:-1])):
+            for i in range(1, len(sigmas) - 2):
+                Log.debug("\t\t" + "Traitement du sigma " + str(i) + " : " + str(sigmas[i]))
                 # On fait une boucle sur l'ensemble des pixels, bords exclus afin de ne pas avoir a faire du cas par cas
                 for x in range(1, height - 1):
                     for y in range(1, width - 1):
@@ -97,6 +101,7 @@ class ExtremaDetector:
             return extremums
 
         def _filtrerPointsContraste(candidats):
+            Log.debug('\t' + "Demarrage du filtrage par contraste")
             realPoints = []
 
             for c in candidats:
@@ -107,6 +112,7 @@ class ExtremaDetector:
             return realPoints
 
         def _filtrerPointsArete(candidats):
+            Log.debug('\t' + "Demarrage du filtrage des arêtes")
             realPoints = []
 
             # On calcul la Hessienne
@@ -129,6 +135,7 @@ class ExtremaDetector:
             return realPoints
 
         def _assignOrientation(candidats):
+            Log.debug('\t' + "Demarrage de l'assignation d'orientation")
             realPoints = []
             VOISINAGE_COTE = 7  # Pour n, on va chercher dans un voisinage de x-n:x+n, y-n:y+n pixels (n+1)**2
             # On creer le slice de l'histogramme
@@ -152,9 +159,9 @@ class ExtremaDetector:
                 # Calcul des amplitude des gradients et de l'orientation
                 M = np.sqrt(np.power(d - g, 2) + np.power(b - h, 2))
                 A = np.arctan2((d - g), (b - h))  # On utilise atan2 comme spécifié dans l'article en anglais
-                A = (A + 2 * np.pi) % (2 * np.pi)
+                A = (A + 2 * np.pi) % (2 * np.pi) # Opération permettant de revenir dans l'interval [0:2pi]
 
-                # Analyse des résultats, on applatit le carré de matrice
+                # Analyse des résultats, on aplatit le carré de matrice pour pouvoir lister les angles
                 Ms, As = M.flat, A.flat
 
                 for k, angle in enumerate(As):
@@ -187,19 +194,19 @@ class ExtremaDetector:
         ## BONUS EVENTUEL ICI
 
         # Filtrage des points de faible contrastes
-        Log.info("\t" + str(len(candidats)) + " points avant le filtrage par contraste")
+        Log.info("\t" + str(len(candidats)) + " points")
         candidats = _filtrerPointsContraste(candidats)
         if analyseur:
             elements["kp_after_contrast_limitation"] = copy.deepcopy(candidats)
 
         # Filtrage des points sur les arêtes
-        Log.info("\t" + str(len(candidats)) + " points avant le filtrage des arêtes")
+        Log.info("\t" + str(len(candidats)) + " points")
         candidats = _filtrerPointsArete(candidats)
         if analyseur:
             elements["kp_after_hessian_filter"] = copy.deepcopy(candidats)
 
         # Assignation de l'orientation des points
-        Log.info("\t" + str(len(candidats)) + " points avant l'assignation d'orientation")
+        Log.info("\t" + str(len(candidats)) + " points")
         candidats = _assignOrientation(candidats)
         if analyseur:
             elements["kp_after_orientation_assignation"] = copy.deepcopy(candidats)
