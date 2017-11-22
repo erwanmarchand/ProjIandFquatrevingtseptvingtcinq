@@ -77,39 +77,40 @@ class ExtremaDetector:
         for DoG in DoGs:
             DoGsNormalized.append(ImageManager.normalizeImage(DoG))
 
-        def _detectionExtremums():
-            Log.debug("\t" + "Demarrage de la détéction des extremums")
-            extremums = []
-
-            for i in range(1, len(sigmas) - 2):
-                Log.debug("\t\t" + "Traitement du sigma " + str(i) + " : " + str(sigmas[i]))
-                # On fait une boucle sur l'ensemble des pixels, bords exclus afin de ne pas avoir a faire du cas par cas
-                for x in range(1, height - 1):
-                    for y in range(1, width - 1):
-                        neighbours = []
-
-                        neighbours += [DoGs[i - 1][x - 1:x + 2, y - 1:y + 2]]
-                        neighbours += [DoGs[i][x - 1:x + 2, y - 1:y + 2]]
-                        neighbours += [DoGs[i + 1][x - 1:x + 2, y - 1:y + 2]]
-
-                        neighbours = np.array(neighbours).flat
-
-                        # Si le point est effectivement le maximum de la region, c'est un point candidat
-                        if DoGs[i][x, y] == np.max(neighbours) or DoGs[i][x, y] == np.min(neighbours):
-                            extremums.append((x, y, i))
-
-            return extremums
-
-        def _filtrerPointsContraste(candidats):
+        def _filtrerPointsContraste():
             Log.debug("\t" + "Demarrage du filtrage par contraste")
             realPoints = []
 
-            for c in candidats:
-                (x, y, i) = c
-                if abs(DoGsNormalized[i][x, y]) > seuil_contraste:
-                    realPoints.append(c)
+            for i in range(1, len(sigmas) - 2):
+                # On fait une boucle sur l'ensemble des pixels, bords exclus afin de ne pas avoir a faire du cas par cas
+                Log.debug("\t\t" + "Traitement du sigma " + str(i) + " : " + str(sigmas[i]))
+                for x in range(1, height - 1):
+                    for y in range(1, width - 1):
+                        if abs(DoGsNormalized[i][x, y]) > seuil_contraste:
+                            realPoints.append((x, y, i))
 
             return realPoints
+
+        def _detectionExtremums(candidats):
+            Log.debug("\t" + "Demarrage de la détéction des extremums")
+            extremums = []
+
+            for c in candidats:
+
+                (x, y, i) = c
+                neighbours = []
+
+                neighbours += [DoGs[i - 1][x - 1:x + 2, y - 1:y + 2]]
+                neighbours += [DoGs[i][x - 1:x + 2, y - 1:y + 2]]
+                neighbours += [DoGs[i + 1][x - 1:x + 2, y - 1:y + 2]]
+
+                neighbours = np.array(neighbours).flat
+
+                # Si le point est effectivement le maximum de la region, c'est un point candidat
+                if DoGs[i][x, y] == np.max(neighbours) or DoGs[i][x, y] == np.min(neighbours):
+                    extremums.append((x, y, i))
+
+            return extremums
 
         def _filtrerPointsArete(candidats):
             Log.debug("\t" + "Demarrage du filtrage des arêtes")
@@ -186,18 +187,18 @@ class ExtremaDetector:
         analyseur = OctaveAnalyzer(octave_nb) if pyramid_analyzer else None
         elements = {} if analyseur else None
 
+        # Filtrage des points de faible contrastes
+        candidats = _filtrerPointsContraste()
+        Log.info("\t" + str(len(candidats)) + " points")
+        if analyseur:
+            elements["kp_after_contrast_limitation"] = copy.deepcopy(candidats)
+
         # Detection des extremums
-        candidats = _detectionExtremums()
+        candidats = _detectionExtremums(candidats)
         if analyseur:
             elements["kp_after_extremum_detection"] = copy.deepcopy(candidats)
 
         ## BONUS EVENTUEL ICI
-
-        # Filtrage des points de faible contrastes
-        Log.info("\t" + str(len(candidats)) + " points")
-        candidats = _filtrerPointsContraste(candidats)
-        if analyseur:
-            elements["kp_after_contrast_limitation"] = copy.deepcopy(candidats)
 
         # Filtrage des points sur les arêtes
         Log.info("\t" + str(len(candidats)) + " points")

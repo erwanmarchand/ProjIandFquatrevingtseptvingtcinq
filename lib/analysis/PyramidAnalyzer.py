@@ -14,7 +14,7 @@ EXTENSION = "png"
 
 class PyramidAnalyzer:
     def __init__(self, outpath="out/"):
-        plt.tight_layout()
+        #plt.tight_layout()
 
         self.outpath = outpath
         self.originalPicture = None
