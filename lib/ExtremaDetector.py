@@ -27,7 +27,7 @@ class ExtremaDetector:
         verbose = kwargs.get('verbose', False)
 
         # Construction de la pyramide de gaussiennes
-        Log.debug('\t' + "Génération de la pyramide de Gaussiennes")
+        Log.debug("\t" + "Génération de la pyramide de Gaussiennes")
         sigmas = [1.6 * 2 ** (float(k) / float(s)) for k in range(nb_element)]
         pyramid = [[] for k in range(nb_octave)]
 
@@ -38,7 +38,7 @@ class ExtremaDetector:
                 pyramid[octave].append(ImageManager.applyGaussianFilter(octave_original, sigmas[k]))
 
         # Generation de la pyramide des différences
-        Log.debug('\t' + "Génération de la pyramide des différences de Gaussiennes")
+        Log.debug("\t" + "Génération de la pyramide des différences de Gaussiennes")
         doG = [[] for k in range(nb_octave)]
 
         for octave in range(nb_octave):
@@ -78,7 +78,7 @@ class ExtremaDetector:
             DoGsNormalized.append(ImageManager.normalizeImage(DoG))
 
         def _detectionExtremums():
-            Log.debug('\t' + "Demarrage de la détéction des extremums")
+            Log.debug("\t" + "Demarrage de la détéction des extremums")
             extremums = []
 
             for i in range(1, len(sigmas) - 2):
@@ -101,7 +101,7 @@ class ExtremaDetector:
             return extremums
 
         def _filtrerPointsContraste(candidats):
-            Log.debug('\t' + "Demarrage du filtrage par contraste")
+            Log.debug("\t" + "Demarrage du filtrage par contraste")
             realPoints = []
 
             for c in candidats:
@@ -112,7 +112,7 @@ class ExtremaDetector:
             return realPoints
 
         def _filtrerPointsArete(candidats):
-            Log.debug('\t' + "Demarrage du filtrage des arêtes")
+            Log.debug("\t" + "Demarrage du filtrage des arêtes")
             realPoints = []
 
             # On calcul la Hessienne
@@ -135,7 +135,7 @@ class ExtremaDetector:
             return realPoints
 
         def _assignOrientation(candidats):
-            Log.debug('\t' + "Demarrage de l'assignation d'orientation")
+            Log.debug("\t" + "Demarrage de l'assignation d'orientation")
             realPoints = []
             VOISINAGE_COTE = 7  # Pour n, on va chercher dans un voisinage de x-n:x+n, y-n:y+n pixels (n+1)**2
             # On creer le slice de l'histogramme

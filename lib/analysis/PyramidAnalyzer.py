@@ -14,6 +14,8 @@ EXTENSION = "png"
 
 class PyramidAnalyzer:
     def __init__(self, outpath="out/"):
+        plt.tight_layout()
+
         self.outpath = outpath
         self.originalPicture = None
         self.greyscalePicture = None
@@ -139,7 +141,7 @@ class PyramidAnalyzer:
         candidates = self.keypoints
         img = PyramidAnalyzer.showKeyPoints(copy.deepcopy(self.originalPicture), candidates)
         plt.imshow(img)
-        plt.title("Keypoints - " + str(len(oa.finalKeypoints)))
+        plt.title("Keypoints - " + str(len(self.keypoints)))
 
         # Affichage des points par octaves
         plt.savefig(self.outpath + "final." + EXTENSION, format=EXTENSION, dpi=DPI)
