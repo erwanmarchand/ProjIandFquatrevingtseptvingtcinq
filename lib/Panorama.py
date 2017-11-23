@@ -10,9 +10,12 @@ class Panorama:
         pass
         
     @staticmethod
-    def getSIFTPoints(imgLeft, imgRight):
+    def getSIFTPoints(imgLeft, imgRight, **kwargs):
         s = 3
         octave = 3
+
+        # Chargement de l'analyseur
+        panoramaAnalyzer = kwargs.get("panorama_analyzer", None)
 
         # On convertit l'image en nuances de gris pour travailler dessus
         Log.debug("Conversion des images en niveaux de gris")
@@ -51,11 +54,17 @@ class Panorama:
             keypointsLeft[i][1] = keypointsRight[i][1] + 1000 
         keypointsLeft[0] = keypointsRight[5]
         keypointsLeft[0][1] = keypointsRight[5][1] + 1000 
+        keypointsLeft = keypointsLeft.astype(int)
+        keypointsRight = keypointsRight.astype(int)
+
+        if panoramaAnalyzer:
+            panoramaAnalyzer.keyPointsLeftPicture = keypointsLeft.copy()
+            panoramaAnalyzer.keyPointsRightPicture = keypointsRight.copy()
 
         return (keypointsLeft,keypointsRight)
 
     @staticmethod
-    def distanceInterPoints(points_image1, points_image2):
+    def distanceInterPoints(points_image1, points_image2, **kwargs):
 
         def _distanceEuclidean(point1, point2):
 
@@ -78,12 +87,21 @@ class Panorama:
         return euclideanDist
 
     @staticmethod
-    def getFriendlyCouples(imgLeft, imgRight, n):
+    def getFriendlyCouples(imgLeft, imgRight, n, **kwargs):
+
+        # Chargement de l'analyseur
+        panoramaAnalyzer = kwargs.get("panorama_analyzer", None)
+
 
         friendlyPoints = []
 
-        (SIFTPointsLeft,SIFTPointsRight) = Panorama.getSIFTPoints(imgLeft, imgRight)
-        distEuc = Panorama.distanceInterPoints(SIFTPointsLeft,SIFTPointsRight)
+        (SIFTPointsLeft,SIFTPointsRight) = Panorama.getSIFTPoints(imgLeft, imgRight ,
+                panorama_analyzer=panoramaAnalyzer,
+                verbose=kwargs.get("verbose", False))
+
+        distEuc = Panorama.distanceInterPoints(SIFTPointsLeft,SIFTPointsRight,
+                panorama_analyzer=panoramaAnalyzer,
+                verbose=kwargs.get("verbose", False))
 
         matrixDistances = distEuc.copy()
 
@@ -97,5 +115,7 @@ class Panorama:
             jMin = minPosition[1][0]
             friendlyPoints.append((SIFTPointsLeft[iMin],SIFTPointsRight[jMin]))
             matrixDistances[iMin][jMin] = maxValue
+
+        panoramaAnalyzer.friendlyCouples = friendlyPoints.copy()
 
         return friendlyPoints
