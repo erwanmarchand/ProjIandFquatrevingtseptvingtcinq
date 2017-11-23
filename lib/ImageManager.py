@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 import cv2
 import matplotlib.pyplot as plt
 
@@ -9,6 +8,9 @@ GAUSSIAN_PARAMETER = 2
 
 
 class ImageManager:
+    def __init__(self):
+        pass
+
     @staticmethod
     def loadMatrix(path, *args):
         data = cv2.imread(path, *args)

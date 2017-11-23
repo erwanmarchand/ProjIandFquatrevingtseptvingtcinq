@@ -5,6 +5,9 @@
     Inspired by python/cpython log library
     Adapted by Thibault PIANA
 """
+import sys
+import time
+import platform
 
 DEBUG = 1
 INFO = 2
@@ -15,12 +18,11 @@ FATAL = 5
 CSI = "\x1B["
 DEBUG_ACTIVATED = True
 
-import sys
-import time
-import platform
-
 
 class Log:
+    def __init__(self):
+        pass
+
     @staticmethod
     def _log(level, msg, indentation):
         msg = ("    " * indentation) + msg

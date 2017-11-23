@@ -6,12 +6,30 @@ import scipy.signal as signal
 
 
 class Filter:
+    def __init__(self):
+        pass
+
     @staticmethod
-    def applyFilter(image, filter, **kwargs):
-        return signal.convolve2d(image, filter, kwargs.get("mode", "same"), kwargs.get("boundary", "symm"))
+    def applyFilter(image, filter_matrix, **kwargs):
+        """
+        Applique un filtre à une image
+        :param image:           L'image sur laquelle le filtre doit être appliqué
+        :param filter_matrix:   La matrice représentant le filtre
+        :param kwargs:          Arguments facultatifs de la méthode de convolution
+        :return: L'image convoluée
+        """
+
+        return signal.convolve2d(image, filter_matrix, kwargs.get("mode", "same"), kwargs.get("boundary", "symm"))
 
     @staticmethod
     def createGaussianFilter(P, sigma):
+        """
+        Génère un filtre gaussien
+        :param P:       La taille de la matrice à générer
+        :param sigma:   Le paramètre du filtre
+        :return:        Un matrice de (2P +1)x(2P + 1) représentant un filtre gaussien de paramètre sigma
+        """
+
         matrix = np.zeros((2 * P + 1, 2 * P + 1))
         som = 0
         for m in range(-P, P + 1):
