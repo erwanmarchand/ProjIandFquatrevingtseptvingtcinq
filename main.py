@@ -8,6 +8,8 @@ import numpy as np
 
 IMAGES_PATH = "images/"
 NAME_PICTURE = 'lena2.jpg'
+NAME_IMAGE_GAUCHE = 'gauche.jpg'
+NAME_IMAGE_DROITE = 'droite.jpg'
 
 ANALYSIS = True
 DEBUG = True
