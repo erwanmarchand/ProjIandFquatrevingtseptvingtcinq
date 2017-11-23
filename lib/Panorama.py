@@ -1,14 +1,15 @@
+# -*- coding: utf-8 -*-
 from lib.ImageProcessor import *
 from lib.analysis.PyramidAnalyzer import *
 from lib.debug.Log import *
 
-import lib.debug.Log as Log_file
 import numpy as np
+
 
 class Panorama:
     def __init__(self):
         pass
-        
+
     @staticmethod
     def getSIFTPoints(imgLeft, imgRight, **kwargs):
         s = 3
@@ -39,33 +40,33 @@ class Panorama:
 
         # TODO : decomment next lines and remove DEBUG Ones
         keypointsLeft = ImageProcessor.findKeypoints(imgLeftGreyscale, s, octave,
-                                        verbose=DEBUG,
-                                         pyramid_analyzer=None)
-        keypointsRight= ImageProcessor.findKeypoints(imgRightGreyscale, s, octave,
-                                         verbose=DEBUG,
-                                         pyramid_analyzer=None)
+                                                     verbose=DEBUG,
+                                                     pyramid_analyzer=None)
+        keypointsRight = ImageProcessor.findKeypoints(imgRightGreyscale, s, octave,
+                                                      verbose=DEBUG,
+                                                      pyramid_analyzer=None)
 
-        #DEBUG
-        #keypointsLeft = np.trunc(1000 * np.random.rand(10,130))
-        #keypointsRight = np.trunc(1000 *  np.random.rand(15,130))
-        #for i in range(0, 4):
+        # DEBUG
+        # keypointsLeft = np.trunc(1000 * np.random.rand(10,130))
+        # keypointsRight = np.trunc(1000 *  np.random.rand(15,130))
+        # for i in range(0, 4):
         #    keypointsLeft[i] = keypointsRight[i]
         #    keypointsLeft[i][3] = 4
         #    keypointsLeft[i][1] = keypointsRight[i][1] + 1000 
-        #keypointsLeft[0] = keypointsRight[5]
-        #keypointsLeft[0][1] = keypointsRight[5][1] + 1000 
-        #keypointsLeft = keypointsLeft.astype(int)
-        #keypointsRight = keypointsRight.astype(int)
-        #for i in range(0, 10):
+        # keypointsLeft[0] = keypointsRight[5]
+        # keypointsLeft[0][1] = keypointsRight[5][1] + 1000
+        # keypointsLeft = keypointsLeft.astype(int)
+        # keypointsRight = keypointsRight.astype(int)
+        # for i in range(0, 10):
         #    keypointsLeft[i][2] = 3
-        #for i in range(0, 15):
+        # for i in range(0, 15):
         #    keypointsRight[i][2] = 3
 
         if panoramaAnalyzer:
             panoramaAnalyzer.keyPointsLeftPicture = keypointsLeft.copy()
             panoramaAnalyzer.keyPointsRightPicture = keypointsRight.copy()
 
-        return (keypointsLeft,keypointsRight)
+        return (keypointsLeft, keypointsRight)
 
     @staticmethod
     def distanceInterPoints(points_image1, points_image2, **kwargs):
@@ -74,19 +75,18 @@ class Panorama:
 
             result = 0
             for i in range(2, len(point1)):
-                result = result + ((point1[i]-point2[i])**2)
+                result = result + ((point1[i] - point2[i]) ** 2)
             result = np.sqrt(result)
             return result
-        
+
         nbrKeyPointsImgLeft = len(points_image1)
         nbrKeyPointsImgRight = len(points_image2)
 
-        euclideanDist = np.zeros((nbrKeyPointsImgLeft,nbrKeyPointsImgRight))
+        euclideanDist = np.zeros((nbrKeyPointsImgLeft, nbrKeyPointsImgRight))
 
         for i in range(0, euclideanDist.shape[0]):
             for j in range(0, euclideanDist.shape[1]):
                 euclideanDist[i][j] = _distanceEuclidean(points_image1[i], points_image2[j])
-
 
         return euclideanDist
 
@@ -96,30 +96,28 @@ class Panorama:
         # Chargement de l'analyseur
         panoramaAnalyzer = kwargs.get("panorama_analyzer", None)
 
-
         friendlyPoints = []
 
-        (SIFTPointsLeft,SIFTPointsRight) = Panorama.getSIFTPoints(imgLeft, imgRight ,
-                panorama_analyzer=panoramaAnalyzer,
-                verbose=kwargs.get("verbose", False))
+        (SIFTPointsLeft, SIFTPointsRight) = Panorama.getSIFTPoints(imgLeft, imgRight,
+                                                                   panorama_analyzer=panoramaAnalyzer,
+                                                                   verbose=kwargs.get("verbose", False))
 
-        distEuc = Panorama.distanceInterPoints(SIFTPointsLeft,SIFTPointsRight,
-                panorama_analyzer=panoramaAnalyzer,
-                verbose=kwargs.get("verbose", False))
+        distEuc = Panorama.distanceInterPoints(SIFTPointsLeft, SIFTPointsRight,
+                                               panorama_analyzer=panoramaAnalyzer,
+                                               verbose=kwargs.get("verbose", False))
 
         matrixDistances = distEuc.copy()
 
         maxValue = matrixDistances.max()
 
         for index in range(0, n):
-
             minValue = matrixDistances.min()
             minPosition = np.where(matrixDistances == minValue)
             iMin = minPosition[0][0]
             jMin = minPosition[1][0]
-            friendlyPoints.append((SIFTPointsLeft[iMin],SIFTPointsRight[jMin]))
+            friendlyPoints.append((SIFTPointsLeft[iMin], SIFTPointsRight[jMin]))
             matrixDistances[iMin][jMin] = maxValue
 
-        panoramaAnalyzer.friendlyCouples = friendlyPoints.copy()
+        panoramaAnalyzer.friendlyCouples = copy.deepcopy(friendlyPoints)
 
         return friendlyPoints
