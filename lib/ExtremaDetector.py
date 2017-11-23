@@ -120,8 +120,7 @@ class ExtremaDetector:
             for c in candidats:
                 (x, y, i) = c
                 hessianxx = DoGs[i][x + 1, y] + DoGs[i][x - 1, y] - (2 * DoGs[i][x, y])
-                hessianxy = DoGs[i][x + 1, y + 1] - DoGs[i][x, y + 1] - DoGs[i][
-                    x + 1, y] + DoGs[i][x, y]
+                hessianxy = DoGs[i][x - 1, y - 1] - DoGs[i][x - 1, y + 1] - DoGs[i][x + 1, y - 1] + DoGs[i][x + 1, y + 1]
                 hessianyy = DoGs[i][x, y + 1] + DoGs[i][x, y - 1] - (2 * DoGs[i][x, y])
 
                 Tr = hessianxx + hessianyy
