@@ -128,7 +128,7 @@ class ExtremaDetector:
                 Det = (hessianxx * hessianyy) - (hessianxy ** 2)
 
                 R = (Tr ** 2) / Det
-                rapport = ((r_courb_principale + 1) ^ 2) / r_courb_principale
+                rapport = ((r_courb_principale + 1) ** 2) / r_courb_principale
 
                 if R < rapport:
                     realPoints.append(c)
