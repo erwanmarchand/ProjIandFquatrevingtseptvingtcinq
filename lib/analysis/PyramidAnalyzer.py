@@ -8,15 +8,16 @@ import lib.analysis.Utils as UtilsAnalysis
 
 import os
 import copy
+import matplotlib
+import matplotlib.pyplot as plt
 
-DPI = 800
+DPI = 1500
 EXTENSION = "png"
+
 
 class PyramidAnalyzer:
     def __init__(self, outpath="out/"):
-        #plt.tight_layout()
-
-        self.outpath = outpath
+        self.outpath = outpath if outpath[-1] == "/" else outpath + "/"
         self.originalPicture = None
         self.greyscalePicture = None
         self.remasteredPicture = None
@@ -43,13 +44,18 @@ class PyramidAnalyzer:
         else:
             raise Exception("Erreur : Mauvaise classe passée en paramètre (type : " + str(type(octaveAnalyzer)) + ")")
 
+    def saveToFile(self, name):
+        matplotlib.rcParams.update({'font.size': 5})
+
+        plt.savefig(self.outpath + name + "." + EXTENSION, bbox_inches='tight', format=EXTENSION, dpi=DPI)
+
     def analyze(self):
         functions = [
             self.saveCandidats,
             self.savePyramids,
             self.saveOctaves,
             self.generateGraph,
-            self.saveFinalKeypoints
+            self.saveFinal
         ]
 
         # Lancement de l'analyse
@@ -70,14 +76,14 @@ class PyramidAnalyzer:
         plt.figure(fi + 1)
         Log.debug("Génération de l'image pour la pyramide des gaussiennes")
         UtilsAnalysis.Utils.showPyramid(self.imagePyramid, self.sigmas)
-        plt.savefig(self.outpath + "images_pyramid." + EXTENSION, format=EXTENSION, dpi=DPI)
+        self.saveToFile("images_pyramid")
         plt.clf()
         plt.cla()
 
         plt.figure(fi + 2)
         Log.debug("Génération de l'image pour la pyramide des différences de gaussiennes")
         UtilsAnalysis.Utils.showPyramid(self.dogPyramid, self.sigmas)
-        plt.savefig(self.outpath + "dogs_pyramid." + EXTENSION, format=EXTENSION, dpi=DPI)
+        self.saveToFile("dogs_pyramid")
         plt.clf()
         plt.cla()
 
@@ -97,16 +103,29 @@ class PyramidAnalyzer:
             for oa in self.octavesAnalyzers:
                 i = oa.octaveNb
 
+                plt.subplot("1" + str(len(self.octavesAnalyzers)) + str(i + 1))
+
                 candidates = oa.elements[ph]
-                candidates = Utils.adaptKeypoints(candidates, i)
+                if ph != "kp_after_contrast_limitation":
+                    candidates = Utils.adaptKeypoints(candidates, i)
+                    img = PyramidAnalyzer.showKeyPoints(copy.deepcopy(self.originalPicture), candidates)
+                else:
+                    height, width, _ = self.originalPicture.shape
+                    img = np.zeros((oa.octaveHeight, oa.octaveWidth))
+                    for elt in candidates:
+                        try:
+                            x, y, j = elt
+                        except ValueError:
+                            x, y, j, a = elt
+
+                        img[x, y] = 1
+
                 candidates = Utils.adaptSigmas(candidates, self.sigmas)
 
-                plt.subplot("1" + str(len(self.octavesAnalyzers)) + str(i))
-                img = PyramidAnalyzer.showKeyPoints(copy.deepcopy(self.originalPicture), candidates)
                 plt.imshow(img)
                 plt.title("Octave " + str(i + 1) + " - " + str(len(candidates)))
 
-            plt.savefig(self.outpath + ph + "." + EXTENSION, format=EXTENSION, dpi=DPI)
+                self.saveToFile(ph)
             plt.clf()
             plt.cla()
 
@@ -117,7 +136,7 @@ class PyramidAnalyzer:
         plt.figure(fi + 1)
         for oa in self.octavesAnalyzers:
             i = oa.octaveNb
-            plt.subplot("1" + str(len(self.octavesAnalyzers)) + str(i))
+            plt.subplot("1" + str(len(self.octavesAnalyzers)) + str(i + 1))
 
             candidates = oa.finalKeypoints
             candidates = Utils.adaptKeypoints(candidates, i)
@@ -128,13 +147,13 @@ class PyramidAnalyzer:
             plt.title("Octave " + str(i + 1) + " - " + str(len(oa.finalKeypoints)))
 
         # Affichage des points par octaves
-        plt.savefig(self.outpath + "final_octaves." + EXTENSION, format=EXTENSION, dpi=DPI)
+        self.saveToFile("final_octaves")
         plt.clf()
         plt.cla()
 
         return fi + 1
 
-    def saveFinalKeypoints(self, fi):
+    def saveFinal(self, fi):
         Log.debug("Génération de l'image finale des keypoints")
         plt.figure(fi + 1)
 
@@ -144,7 +163,7 @@ class PyramidAnalyzer:
         plt.title("Keypoints - " + str(len(self.keypoints)))
 
         # Affichage des points par octaves
-        plt.savefig(self.outpath + "final." + EXTENSION, format=EXTENSION, dpi=DPI)
+        self.saveToFile("final")
         plt.clf()
         plt.cla()
 

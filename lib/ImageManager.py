@@ -43,11 +43,16 @@ class ImageManager:
         return Filter.applyFilter(image, filter)
 
     @staticmethod
-    def showKeyPoint(image, keypoint):
-        radius = keypoint[2] * 10
+    def showKeyPoint(image, keypoint, **kwargs):
+        try:
+            h, w, _ = image.shape
+        except ValueError:
+            h, w = image.shape
+
+        radius = (keypoint[2] ** 1.5) * 8 * min(w, h) / 1024
 
         COLOR = [(keypoint[2] * 1000) % 256, (keypoint[2] * 333) % 256, (keypoint[2] * 666) % 256]
-        image = cv2.circle(image, (keypoint[1], keypoint[0]), int(radius), color=COLOR)
+        image = cv2.circle(image, (keypoint[1], keypoint[0]), int(radius), COLOR, 4)
 
         # On dessine la fleche représentant l'orientation du point clé
         try:
@@ -60,7 +65,7 @@ class ImageManager:
                              (keypoint[1], keypoint[0]),
                              (keypoint[1] + int(np.cos(keypoint[3]) * radius),
                               keypoint[0] - int(np.sin(keypoint[3]) * radius)),
-                             color=COLOR)
+                             COLOR, 2)
 
         return image
 

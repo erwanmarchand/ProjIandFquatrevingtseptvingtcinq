@@ -184,7 +184,7 @@ class ExtremaDetector:
 
         # On initialise la tableau d'analyse pour l'analyseur
         pyramid_analyzer = kwargs.get("pyramid_analyzer", None)
-        analyseur = OctaveAnalyzer(octave_nb) if pyramid_analyzer else None
+        analyseur = OctaveAnalyzer(octave_nb, width, height) if pyramid_analyzer else None
         elements = {} if analyseur else None
 
         # Filtrage des points de faible contrastes
