@@ -26,8 +26,4 @@ imgDroiteWithColor = ImageManager.getOctave(imgDroiteWithColor, -1)
 
 # On crée le panorama
 
-(SIFTPointsLeft,SIFTPointsRight) = Panorama.getSIFTPoints(imgGaucheWithColor, imgDroiteWithColor)
-
-distEuc = Panorama.distanceInterPoints(SIFTPointsLeft,SIFTPointsRight)
-
-test = 3
+minValues = Panorama.getFriendlyCouples(imgGaucheWithColor, imgDroiteWithColor, 4)

@@ -47,7 +47,10 @@ class Panorama:
         keypointsRight = np.trunc(1000 *  np.random.rand(15,130))
         for i in range(0, 4):
             keypointsLeft[i] = keypointsRight[i]
+            keypointsLeft[i][3] = 4
             keypointsLeft[i][1] = keypointsRight[i][1] + 1000 
+        keypointsLeft[0] = keypointsRight[5]
+        keypointsLeft[0][1] = keypointsRight[5][1] + 1000 
 
         return (keypointsLeft,keypointsRight)
 
@@ -74,4 +77,25 @@ class Panorama:
 
         return euclideanDist
 
-    
+    @staticmethod
+    def getFriendlyCouples(imgLeft, imgRight, n):
+
+        friendlyPoints = []
+
+        (SIFTPointsLeft,SIFTPointsRight) = Panorama.getSIFTPoints(imgLeft, imgRight)
+        distEuc = Panorama.distanceInterPoints(SIFTPointsLeft,SIFTPointsRight)
+
+        matrixDistances = distEuc.copy()
+
+        maxValue = matrixDistances.max()
+
+        for index in range(0, n):
+
+            minValue = matrixDistances.min()
+            minPosition = np.where(matrixDistances == minValue)
+            iMin = minPosition[0][0]
+            jMin = minPosition[1][0]
+            friendlyPoints.append((SIFTPointsLeft[iMin],SIFTPointsRight[jMin]))
+            matrixDistances[iMin][jMin] = maxValue
+
+        return friendlyPoints
