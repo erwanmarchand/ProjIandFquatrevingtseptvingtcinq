@@ -20,12 +20,12 @@ class PanoramaAnalyzer:
         self.outpath = outpath if outpath[-1] == "/" else outpath + "/"
 
         self.originalLeftPicture = None
-        self.keyPointsLeftPicture = None
+        self.keyPointsLeftPicture = []
 
         self.originalRightPicture = None
-        self.keyPointsRightPicture = None
+        self.keyPointsRightPicture = []
 
-        self.friendlyCouples = None
+        self.friendlyCouples = []
 
         matplotlib.rcParams.update({'font.size': 5})
 
@@ -35,7 +35,7 @@ class PanoramaAnalyzer:
 
     def analyze(self):
         functions = [
-            self.saveTest
+            self.saveFriendlyCouples
         ]
 
         # Lancement de l'analyse
@@ -48,21 +48,38 @@ class PanoramaAnalyzer:
     def saveToFile(self, name):
         plt.savefig(self.outpath + name + "." + EXTENSION, bbox_inches='tight', format=EXTENSION, dpi=DPI)
 
-    def saveTest(self, fi):
-        Log.debug("Génération de l'image test")
+    def saveFriendlyCouples(self, fi):
+        Log.debug("Génération des images avec couples de points clés amis")
         plt.figure(fi + 1)
 
-        candidates = self.keyPointsLeftPicture
-        img = PanoramaAnalyzer.showKeyPoints(copy.deepcopy(self.originalLeftPicture), candidates)
+        candidatesLeft = []
+        candidatesRight = []
+        for i in range (0, len(self.friendlyCouples)):
+            candidatesLeft.append(self.friendlyCouples[i][0])
+            candidatesRight.append(self.friendlyCouples[i][1])
+
+        img = PanoramaAnalyzer.showKeyPoints(copy.deepcopy(self.originalLeftPicture), candidatesLeft)
         plt.imshow(img)
-        plt.title("Keypoints - " + str(len(self.keyPointsLeftPicture)))
+        plt.title("Keypoints - " + str(len(self.friendlyCouples)))
 
         # Affichage des points par octaves
-        self.saveToFile("test")
+        self.saveToFile("friendly_keypoints_left_image")
         plt.clf()
         plt.cla()
 
-        return fi + 1
+
+        plt.figure(fi + 2)
+
+        img = PanoramaAnalyzer.showKeyPoints(copy.deepcopy(self.originalRightPicture), candidatesRight)
+        plt.imshow(img)
+        plt.title("Keypoints - " + str(len(self.friendlyCouples)))
+
+        # Affichage des points par octaves
+        self.saveToFile("friendly_keypoints_right_image")
+        plt.clf()
+        plt.cla()
+
+        return fi + 2
 
     @staticmethod
     def showKeyPoints(image, keypoints):

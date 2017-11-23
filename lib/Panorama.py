@@ -38,24 +38,28 @@ class Panorama:
         # On applique l'algorithme
 
         # TODO : decomment next lines and remove DEBUG Ones
-        #keypointsLeft = ImageProcessor.findKeypoints(imgLeftGreyscale, s, octave,
-        #                                verbose=DEBUG,
-        #                                 pyramid_analyzer=None)
-        #keypointsRight= ImageProcessor.findKeypoints(imgRightGreyscale, s, octave,
-        #                                 verbose=DEBUG,
-        #                                 pyramid_analyzer=None)
+        keypointsLeft = ImageProcessor.findKeypoints(imgLeftGreyscale, s, octave,
+                                        verbose=DEBUG,
+                                         pyramid_analyzer=None)
+        keypointsRight= ImageProcessor.findKeypoints(imgRightGreyscale, s, octave,
+                                         verbose=DEBUG,
+                                         pyramid_analyzer=None)
 
         #DEBUG
-        keypointsLeft = np.trunc(1000 * np.random.rand(10,130))
-        keypointsRight = np.trunc(1000 *  np.random.rand(15,130))
-        for i in range(0, 4):
-            keypointsLeft[i] = keypointsRight[i]
-            keypointsLeft[i][3] = 4
-            keypointsLeft[i][1] = keypointsRight[i][1] + 1000 
-        keypointsLeft[0] = keypointsRight[5]
-        keypointsLeft[0][1] = keypointsRight[5][1] + 1000 
-        keypointsLeft = keypointsLeft.astype(int)
-        keypointsRight = keypointsRight.astype(int)
+        #keypointsLeft = np.trunc(1000 * np.random.rand(10,130))
+        #keypointsRight = np.trunc(1000 *  np.random.rand(15,130))
+        #for i in range(0, 4):
+        #    keypointsLeft[i] = keypointsRight[i]
+        #    keypointsLeft[i][3] = 4
+        #    keypointsLeft[i][1] = keypointsRight[i][1] + 1000 
+        #keypointsLeft[0] = keypointsRight[5]
+        #keypointsLeft[0][1] = keypointsRight[5][1] + 1000 
+        #keypointsLeft = keypointsLeft.astype(int)
+        #keypointsRight = keypointsRight.astype(int)
+        #for i in range(0, 10):
+        #    keypointsLeft[i][2] = 3
+        #for i in range(0, 15):
+        #    keypointsRight[i][2] = 3
 
         if panoramaAnalyzer:
             panoramaAnalyzer.keyPointsLeftPicture = keypointsLeft.copy()
@@ -69,13 +73,13 @@ class Panorama:
         def _distanceEuclidean(point1, point2):
 
             result = 0
-            for i in range(2, point1.size):
+            for i in range(2, len(point1)):
                 result = result + ((point1[i]-point2[i])**2)
             result = np.sqrt(result)
             return result
         
-        nbrKeyPointsImgLeft = points_image1.shape[0]
-        nbrKeyPointsImgRight = points_image2.shape[0]
+        nbrKeyPointsImgLeft = len(points_image1)
+        nbrKeyPointsImgRight = len(points_image2)
 
         euclideanDist = np.zeros((nbrKeyPointsImgLeft,nbrKeyPointsImgRight))
 
