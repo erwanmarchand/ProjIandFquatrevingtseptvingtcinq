@@ -129,6 +129,8 @@ class ExtremaDetector:
                 Dyy[k] = Filter.convolve2D(Dy[k], Fy)
                 Dxy[k] = (Filter.convolve2D(Dx[k], Fy) + Filter.convolve2D(Dy[k], Fx)) / 2
 
+
+
             # On calcul la Hessienne
             for c in candidats:
                 (x, y, i) = c
