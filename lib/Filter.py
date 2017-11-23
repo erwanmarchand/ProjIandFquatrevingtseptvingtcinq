@@ -27,7 +27,7 @@ class Filter:
         Génère un filtre gaussien
         :param P:       La taille de la matrice à générer
         :param sigma:   Le paramètre du filtre
-        :return:        Un matrice de (2P +1)x(2P + 1) représentant un filtre gaussien de paramètre sigma
+        :return:        Une matrice de (2P +1)x(2P + 1) représentant un filtre gaussien de paramètre sigma
         """
 
         matrix = np.zeros((2 * P + 1, 2 * P + 1))

@@ -13,7 +13,7 @@ class ExtremaDetector:
     @staticmethod
     def differenceDeGaussienne(image, s, nb_octave, **kwargs):
         """
-        Génère la pyramide des DoG d'une image
+        Génère la pyramide des DoGs d'une image
         :param image:       L'image originale
         :param s:           Le facteur s
         :param nb_octave:   Le nombre d'octave sur lesquelles on veut travailler
