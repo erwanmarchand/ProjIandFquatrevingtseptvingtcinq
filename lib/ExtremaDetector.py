@@ -240,6 +240,8 @@ class ExtremaDetector:
 
     @staticmethod
     def descriptionPointsCles(image_initiale, points_cles):
+        for (row, col, sigma, a) in points_cles:
+            image_travail = - ImageManager.rotate((row, col), image_initiale, -a * 180 / np.pi)
 
 
         pass
