@@ -10,7 +10,7 @@ class Filter:
         pass
 
     @staticmethod
-    def applyFilter(image, filter_matrix, **kwargs):
+    def convolve2D(image, filter_matrix, **kwargs):
         """
         Applique un filtre à une image
         :param image:           L'image sur laquelle le filtre doit être appliqué

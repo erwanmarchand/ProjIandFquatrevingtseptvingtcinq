@@ -80,7 +80,7 @@ class ExtremaDetector:
             Log.debug("Demarrage du filtrage par contraste", 1)
             realPoints = []
 
-            for i in range(1, len(sigmas) - 2):
+            for i in range(1, len(DoGs) - 1):
                 # On fait une boucle sur l'ensemble des pixels, bords exclus afin de ne pas avoir a faire du cas par cas
                 Log.debug("Traitement du sigma " + str(i) + " : " + str(sigmas[i]), 2)
                 for x in range(1, height - 1):
@@ -115,21 +115,30 @@ class ExtremaDetector:
             Log.debug("Demarrage du filtrage des arêtes", 1)
             realPoints = []
 
+            Dx, Dy, Dxx, Dyy, Dxy = {}, {}, {}, {}, {}
+
+            Fy = np.matrix('-1 0 1;-2 0 2;-1 0 1')
+            Fx = np.matrix('1 2 1;0 0 0;-1 -2 -1')
+
+            for k in range(1, len(DoGs) - 1):
+                Dx[k] = Filter.convolve2D(DoGsNormalized[k], Fx)
+                Dy[k] = Filter.convolve2D(DoGsNormalized[k], Fy)
+
+            for k in range(1, len(DoGs) - 1):
+                Dxx[k] = Filter.convolve2D(Dx[k], Fx)
+                Dyy[k] = Filter.convolve2D(Dy[k], Fy)
+                Dxy[k] = (Filter.convolve2D(Dx[k], Fy) + Filter.convolve2D(Dy[k], Fx)) / 2
+
             # On calcul la Hessienne
             for c in candidats:
                 (x, y, i) = c
 
-                hessianxx = DoGs[i][x + 1, y] + DoGs[i][x - 1, y] - (2 * DoGs[i][x, y])
-                hessianxy = DoGs[i][x - 1, y - 1] - DoGs[i][x - 1, y + 1] - DoGs[i][x + 1, y - 1] + DoGs[i][
-                    x + 1, y + 1]
-                hessianyy = DoGs[i][x, y + 1] + DoGs[i][x, y - 1] - (2 * DoGs[i][x, y])
-
-                Tr = hessianxx + hessianyy
-                Det = (hessianxx * hessianyy) - (hessianxy ** 2)
+                Tr = Dxx[i][x, y] + Dyy[i][x, y]
+                Det = (Dxx[i][x, y] * Dyy[i][x, y]) - (Dxy[i][x, y] ** 2)
 
                 R = (Tr ** 2) / Det
-                rapport = ((r_courb_principale + 1) ** 2) / r_courb_principale
 
+                rapport = ((r_courb_principale + 1) ** 2) / r_courb_principale
                 if R < rapport:
                     realPoints.append(c)
 

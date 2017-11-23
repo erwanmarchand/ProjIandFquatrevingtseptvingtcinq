@@ -42,7 +42,7 @@ class ImageManager:
     @staticmethod
     def applyGaussianFilter(image, sigma):
         filter = Filter.createGaussianFilter(int(sigma * 3), sigma)
-        return Filter.applyFilter(image, filter)
+        return Filter.convolve2D(image, filter)
 
     @staticmethod
     def showKeyPoint(image, keypoint, **kwargs):

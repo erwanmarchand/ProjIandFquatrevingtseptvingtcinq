@@ -28,6 +28,8 @@ class PyramidAnalyzer:
         self.octavesAnalyzers = []
         self.keypoints = []
 
+        matplotlib.rcParams.update({'font.size': 5})
+
         if not os.path.exists(outpath):
             # On creer le dossier de sortie si il n'existe pas
             os.makedirs(outpath)
@@ -45,8 +47,6 @@ class PyramidAnalyzer:
             raise Exception("Erreur : Mauvaise classe passée en paramètre (type : " + str(type(octaveAnalyzer)) + ")")
 
     def saveToFile(self, name):
-        matplotlib.rcParams.update({'font.size': 5})
-
         plt.savefig(self.outpath + name + "." + EXTENSION, bbox_inches='tight', format=EXTENSION, dpi=DPI)
 
     def analyze(self):
