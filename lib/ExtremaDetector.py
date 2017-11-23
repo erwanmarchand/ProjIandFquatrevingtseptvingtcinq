@@ -16,7 +16,7 @@ class ExtremaDetector:
         Génère la pyramide des DoGs d'une image
         :param image:       L'image originale
         :param s:           Le facteur s
-        :param nb_octave:   Le nombre d'octave sur lesquelles on veut travailler
+        :param nb_octave:   Le nombre d'octave à générer
         :return:            (DoGs, pyramide des octaves, liste des sigmas)
         """
         if image is None:
@@ -27,11 +27,15 @@ class ExtremaDetector:
 
         # Construction de la pyramide de gaussiennes
         Log.debug("Génération de la pyramide de Gaussiennes", 1)
-        sigmas = [1.6 * 2 ** (float(k) / float(s)) for k in range(nb_element)]
+        sigmas = [1.6 * (2 ** (float(k) / float(s))) for k in range(nb_element)]
         pyramid = [[] for k in range(nb_octave)]
 
         for octave in range(nb_octave):
-            octave_original = ImageManager.getOctave(image, octave)
+            if octave == 0:
+                octave_original = image
+            else:
+                #  On prend la s + 1 eme image (la numéro s dans le tableau)
+                octave_original = ImageManager.divideSizeBy2(pyramid[octave - 1][s])
 
             for k in range(nb_element):
                 pyramid[octave].append(ImageManager.applyGaussianFilter(octave_original, sigmas[k]))
@@ -80,13 +84,13 @@ class ExtremaDetector:
             Log.debug("Demarrage du filtrage par contraste", 1)
             realPoints = []
 
-            for i in range(1, len(DoGs) - 1):
+            for i_sigma in range(1, len(DoGs) - 1):
                 # On fait une boucle sur l'ensemble des pixels, bords exclus afin de ne pas avoir a faire du cas par cas
-                Log.debug("Traitement du sigma " + str(i) + " : " + str(sigmas[i]), 2)
+                Log.debug("Traitement du sigma " + str(i_sigma) + " : " + str(sigmas[i_sigma]), 2)
                 for x in range(1, height - 1):
                     for y in range(1, width - 1):
-                        if abs(DoGsNormalized[i][x, y]) > seuil_contraste:
-                            realPoints.append((x, y, i))
+                        if abs(DoGsNormalized[i_sigma][x, y]) > seuil_contraste:
+                            realPoints.append((x, y, i_sigma))
 
             return realPoints
 
@@ -95,19 +99,18 @@ class ExtremaDetector:
             extremums = []
 
             for c in candidats:
-
-                (x, y, i) = c
+                (x, y, i_sigma) = c
                 neighbours = []
 
-                neighbours += [DoGs[i - 1][x - 1:x + 2, y - 1:y + 2]]
-                neighbours += [DoGs[i][x - 1:x + 2, y - 1:y + 2]]
-                neighbours += [DoGs[i + 1][x - 1:x + 2, y - 1:y + 2]]
+                neighbours += [DoGs[i_sigma - 1][x - 1:x + 2, y - 1:y + 2]]
+                neighbours += [DoGs[i_sigma][x - 1:x + 2, y - 1:y + 2]]
+                neighbours += [DoGs[i_sigma + 1][x - 1:x + 2, y - 1:y + 2]]
 
                 neighbours = np.array(neighbours).flat
 
                 # Si le point est effectivement le maximum de la region, c'est un point candidat
-                if DoGs[i][x, y] == np.max(neighbours) or DoGs[i][x, y] == np.min(neighbours):
-                    extremums.append((x, y, i))
+                if DoGs[i_sigma][x, y] == np.max(neighbours) or DoGs[i_sigma][x, y] == np.min(neighbours):
+                    extremums.append(c)
 
             return extremums
 
@@ -129,14 +132,12 @@ class ExtremaDetector:
                 Dyy[k] = Filter.convolve2D(Dy[k], Fy)
                 Dxy[k] = (Filter.convolve2D(Dx[k], Fy) + Filter.convolve2D(Dy[k], Fx)) / 2
 
-
-
             # On calcul la Hessienne
             for c in candidats:
-                (x, y, i) = c
+                (x, y, i_sigma) = c
 
-                Tr = Dxx[i][x, y] + Dyy[i][x, y]
-                Det = (Dxx[i][x, y] * Dyy[i][x, y]) - (Dxy[i][x, y] ** 2)
+                Tr = Dxx[i_sigma][x, y] + Dyy[i_sigma][x, y]
+                Det = (Dxx[i_sigma][x, y] * Dyy[i_sigma][x, y]) - (Dxy[i_sigma][x, y] ** 2)
 
                 R = (Tr ** 2) / Det
 
@@ -149,28 +150,34 @@ class ExtremaDetector:
         def _assignOrientation(candidats):
             Log.debug("Demarrage de l'assignation d'orientation", 1)
             realPoints = []
-            VOISINAGE_COTE = 7  # Pour n, on va chercher dans un voisinage de x-n:x+n, y-n:y+n pixels (n+1)**2
             # On creer le slice de l'histogramme
             H_slice = np.linspace(0, 2 * np.pi, 36 + 1)  # 37 valeurs, donc 36 intervalles
 
             for c in candidats:
-                (x, y, i) = c
+                (x, y, i_sigma) = c
+
+                # Pour n, on va chercher dans un voisinage de x-n:x+n, y-n:y+n pixels soit (n+1)**2 pixels
+                taille_voisinage = int(sigmas[i_sigma] * 3)
                 H = np.zeros(36)
 
                 # Selection des points du voisinage en faisant attention aux bords
-                xMax, yMax, xMin, yMin = min(height - 1, x + VOISINAGE_COTE), \
-                                         min(width - 1, y + VOISINAGE_COTE), \
-                                         max(1, x - VOISINAGE_COTE), \
-                                         max(1, y - VOISINAGE_COTE)
+                xMax, yMax, xMin, yMin = min(height - 1, x + taille_voisinage), \
+                                         min(width - 1, y + taille_voisinage), \
+                                         max(1, x - taille_voisinage), \
+                                         max(1, y - taille_voisinage)
 
-                g, d, b, h = octaves[i][(xMin - 1):(xMax - 1), yMin:yMax], \
-                             octaves[i][(xMin + 1):(xMax + 1), yMin:yMax], \
-                             octaves[i][xMin:xMax, (yMin - 1):(yMax - 1)], \
-                             octaves[i][xMin:xMax, (yMin + 1):(yMax + 1)]
+                g, d, b, h = octaves[i_sigma][(xMin - 1):(xMax - 1), yMin:yMax], \
+                             octaves[i_sigma][(xMin + 1):(xMax + 1), yMin:yMax], \
+                             octaves[i_sigma][xMin:xMax, (yMin - 1):(yMax - 1)], \
+                             octaves[i_sigma][xMin:xMax, (yMin + 1):(yMax + 1)]
+
+                g1, g2 = d - g, b - h
+
+                # TODO : Poderation par une gausienne
 
                 # Calcul des amplitude des gradients et de l'orientation
-                M = np.sqrt(np.power(d - g, 2) + np.power(b - h, 2))
-                A = np.arctan2((d - g), (b - h))  # On utilise atan2 comme spécifié dans l'article en anglais
+                M = np.sqrt(np.power(g1, 2) + np.power(g2, 2))
+                A = np.arctan2(g1, g2)  # On utilise atan2 comme spécifié dans l'article en anglais
                 A = (A + 2 * np.pi) % (2 * np.pi)  # Opération permettant de revenir dans l'interval [0:2pi]
 
                 # Analyse des résultats, on aplatit le carré de matrice pour pouvoir lister les angles
@@ -189,7 +196,7 @@ class ExtremaDetector:
                         angles.append(H_slice[k + 1])
 
                 for a in angles:
-                    realPoints.append((x, y, i, a))
+                    realPoints.append((x, y, i_sigma, a))
 
             return realPoints
 

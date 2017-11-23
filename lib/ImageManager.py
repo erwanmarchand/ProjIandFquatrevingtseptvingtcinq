@@ -30,6 +30,10 @@ class ImageManager:
             return image
 
     @staticmethod
+    def divideSizeBy2(image):
+        return ImageManager.getOctave(image, 1)
+
+    @staticmethod
     def getGreyscale(image):
         return cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
 
@@ -51,10 +55,7 @@ class ImageManager:
         except ValueError:
             h, w = image.shape
 
-        radius = (keypoint[2] ** 1.5) * 8 * min(w, h) / 1024
-
         COLOR = [(keypoint[2] * 1000) % 256, (keypoint[2] * 333) % 256, (keypoint[2] * 666) % 256]
-        image = cv2.circle(image, (keypoint[1], keypoint[0]), int(radius), COLOR, 4)
 
         # On dessine la fleche représentant l'orientation du point clé
         try:
@@ -63,11 +64,15 @@ class ImageManager:
             kp3 = None
 
         if kp3 is not None:
+            radius = (keypoint[2] ** 1.5) * 4 * min(w, h) / 1024
+            image = cv2.circle(image, (keypoint[1], keypoint[0]), int(radius), COLOR, 2)
             image = cv2.line(image,
                              (keypoint[1], keypoint[0]),
                              (keypoint[1] + int(np.cos(keypoint[3]) * radius),
                               keypoint[0] - int(np.sin(keypoint[3]) * radius)),
                              COLOR, 2)
+        else:
+            image = cv2.circle(image, (keypoint[1], keypoint[0]), int(keypoint[2]) + 1, COLOR, 5)
 
         return image
 

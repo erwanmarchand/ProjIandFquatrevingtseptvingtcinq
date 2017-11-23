@@ -13,7 +13,7 @@ ANALYSIS = True
 DEBUG = True
 
 s = 3
-octave = 3
+octave = 4
 
 #  On charge l'image et on la redimensionne
 Log_file.DEBUG_ACTIVATED = DEBUG
