@@ -103,7 +103,7 @@ class PyramidAnalyzer:
             for oa in self.octavesAnalyzers:
                 i = oa.octaveNb
 
-                plt.subplot("1" + str(len(self.octavesAnalyzers)) + str(i + 1))
+                plt.subplot(1, len(self.octavesAnalyzers), i + 1)
 
                 candidates = oa.elements[ph]
                 if ph != "kp_after_contrast_limitation":
@@ -136,7 +136,7 @@ class PyramidAnalyzer:
         plt.figure(fi + 1)
         for oa in self.octavesAnalyzers:
             i = oa.octaveNb
-            plt.subplot("1" + str(len(self.octavesAnalyzers)) + str(i + 1))
+            plt.subplot(1, len(self.octavesAnalyzers), i + 1)
 
             candidates = oa.finalKeypoints
             candidates = Utils.adaptKeypoints(candidates, i)

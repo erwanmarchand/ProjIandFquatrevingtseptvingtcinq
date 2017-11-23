@@ -1,11 +1,9 @@
 # -*- coding: utf-8 -*-
 
 from lib.ExtremaDetector import *
-from lib.debug.Log import *
-from lib.analysis.PyramidAnalyzer import *
 from lib.Utils import *
+from lib.analysis.PyramidAnalyzer import *
 
-import matplotlib.pyplot as plt
 
 class ImageProcessor:
     def __init__(self):
@@ -31,24 +29,23 @@ class ImageProcessor:
                 Log.debug("Debut de l'analyse de l'octave " + str(i + 1))
 
             points = ExtremaDetector.detectionPointsCles(
-                    DoGs[i],
-                    octaves[i],
-                    sigmas,
-                    0.08,
-                    10,
-                    1 / (2 ** i),
-                    i,
-                    pyramid_analyzer=pyramidAnalyzer,
-                    verbose=kwargs.get("verbose", False)
+                DoGs[i],
+                octaves[i],
+                sigmas,
+                0.08,
+                10,
+                1 / (2 ** i),
+                i,
+                pyramid_analyzer=pyramidAnalyzer,
+                verbose=kwargs.get("verbose", False)
             )
 
             # On fait un rescale des points clés
-            Log.info("\t" + "Rescale des points clés")
+            Log.debug("Rescale des points clés", 1)
             octavePoints = Utils.adaptKeypoints(points, i)
 
-            Log.info("\t" + "Remplacement des sigmas par leur valeurs")
+            Log.debug("Remplacement des sigmas par leur valeurs", 1)
             octavePoints = Utils.adaptSigmas(octavePoints, sigmas)
-
 
             if kwargs.get("verbose", False):
                 Log.debug("Nombre de points pour l'octave " + str(i + 1) + " : " + str(len(octavePoints)))
