@@ -237,3 +237,9 @@ class ExtremaDetector:
             pyramid_analyzer.addOctaveAnalyzer(analyseur)
 
         return candidats
+
+    @staticmethod
+    def descriptionPointsCles(image_initiale, points_cles):
+
+
+        pass
