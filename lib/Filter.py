@@ -12,7 +12,7 @@ class Filter:
     @staticmethod
     def convolve2D(image, filter_matrix, **kwargs):
         """
-        Applique un filtre à une image
+        Effectue une convolution entre deux matrices
         :param image:           L'image sur laquelle le filtre doit être appliqué
         :param filter_matrix:   La matrice représentant le filtre
         :param kwargs:          Arguments facultatifs de la méthode de convolution
