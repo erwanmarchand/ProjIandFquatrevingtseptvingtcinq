@@ -48,7 +48,7 @@ class Panorama:
             panoramaAnalyzer.keyPointsLeftPicture = copy.deepcopy(keypointsLeft)
             panoramaAnalyzer.keyPointsRightPicture = copy.deepcopy(keypointsRight)
 
-        return keypointsLeft, keypointsRight
+        return (keypointsLeft, keypointsRight)
 
     @staticmethod
     def distanceInterPoints(points_image1, points_image2, **kwargs):
@@ -99,6 +99,7 @@ class Panorama:
             jMin = minPosition[1][0]
             friendlyPoints.append((SIFTPointsLeft[iMin], SIFTPointsRight[jMin]))
             matrixDistances[iMin][jMin] = maxValue
+            test = 5
 
         panoramaAnalyzer.friendlyCouples = copy.deepcopy(friendlyPoints)
 
