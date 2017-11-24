@@ -173,7 +173,7 @@ class ExtremaDetector:
 
                 g1, g2 = d - g, b - h
 
-                # TODO : Poderation par une gausienne
+                # TODO : Fenètre gausienne
 
                 # Calcul des amplitude des gradients et de l'orientation
                 M = np.sqrt(np.power(g1, 2) + np.power(g2, 2))
@@ -236,12 +236,75 @@ class ExtremaDetector:
             analyseur.elements = elements
             pyramid_analyzer.addOctaveAnalyzer(analyseur)
 
+        Log.debug(str(len(candidats)) + " points", 1)
+
         return candidats
 
     @staticmethod
     def descriptionPointsCles(image_initiale, points_cles):
+        rows, cols = ImageManager.getDimensions(image_initiale)
+        descripteurs = []
+
         for (row, col, sigma, a) in points_cles:
-            image_travail = - ImageManager.rotate((row, col), image_initiale, -a * 180 / np.pi)
+            # On élimine les points clés trop pret du bord
+            if not (row < 9 or col < 9 or rows - row < 9 or cols - col < 9):
 
+                # On fait une rotation de l'image
+                image_travail = ImageManager.rotate(image_initiale, -a * 180 / np.pi, (row, col))
 
-        pass
+                # On dessine un carré de coté 16x16
+                zone_etude_g = image_travail[(row - 8):(row + 8), (col - 8) - 1:(col + 8) - 1]
+                zone_etude_d = image_travail[(row - 8):(row + 8), (col - 8) + 1:(col + 8) + 1]
+                zone_etude_h = image_travail[(row - 8) - 1:(row + 8) - 1, (col - 8):(col + 8)]
+                zone_etude_b = image_travail[(row - 8) + 1:(row + 8) + 1, (col - 8):(col + 8)]
+
+                zone_etude_g1, zone_etude_g2 = zone_etude_d - zone_etude_g, zone_etude_b - zone_etude_h
+
+                # TODO : Fenètre gaussienne
+
+                # Calcul des amplitude des gradients et de l'orientation
+                M = np.sqrt(np.power(zone_etude_g1, 2) + np.power(zone_etude_g2, 2))
+                A = np.arctan2(zone_etude_g1, zone_etude_g2)
+                A = (A + 2 * np.pi) % (2 * np.pi)  # Opération permettant de revenir dans l'interval [0:2pi]
+
+                # On fait l'étude sur chaque carrés de coté 4x4 contenus dans la zone de travail
+                H_angle = np.linspace(0, 360, 8)
+                H_container = []
+                for i in range(4):
+                    for j in range(4):
+                        # On étudie un carré de coté 4x4
+                        As = A[i * 4:i * 4 + 4, j * 4:j * 4 + 4]
+                        Ms = M[i * 4:i * 4 + 4, j * 4:j * 4 + 4]
+
+                        Mf, Af = Ms.flat, As.flat
+                        H = [0] * 8
+
+                        for k, angle in enumerate(As.flat):
+                            for l, an in enumerate(H_angle):
+                                if angle < an:
+                                    H[l] += Mf[k]
+                                    break
+
+                        H_container.append(H)
+
+                # On concatène les histogrammes
+                H_final = H_container[0]
+                for elt in H_container[1::]:
+                    H_final = H_final + elt
+
+                H_final = np.array(H_final)
+                # On normalise
+                H_final = H_final / np.max(H_final)
+
+                # On plafonne a 0.2
+                for k in range(len(H_final)):
+                    if H_final[k] > 0.2:
+                        H_final[k] = 0.2
+
+                # On renormalise
+                H_final = H_final / np.max(H_final)
+
+                descripteur = np.concatenate((np.array([row, col]), H_final))
+                descripteurs.append(descripteur)
+
+        return descripteurs
