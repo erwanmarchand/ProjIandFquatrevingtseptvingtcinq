@@ -308,6 +308,6 @@ class ExtremaDetector:
                 descripteur = np.concatenate((np.array([row, col]), H_final))
                 descripteurs.append(descripteur)
 
-        print(descripteurs)
+        #print(descripteurs)
 
         return descripteurs

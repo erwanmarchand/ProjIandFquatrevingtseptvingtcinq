@@ -64,6 +64,8 @@ class Panorama:
         nbrKeyPointsImgLeft = len(points_image1)
         nbrKeyPointsImgRight = len(points_image2)
 
+        Log.debug("Calcul de la matrice de taille : "+str(nbrKeyPointsImgLeft)+" x "+str(nbrKeyPointsImgRight)+" des distances entre points clés")
+
         euclideanDist = np.zeros((nbrKeyPointsImgLeft, nbrKeyPointsImgRight))
 
         for i in range(0, euclideanDist.shape[0]):
@@ -74,6 +76,8 @@ class Panorama:
 
     @staticmethod
     def getFriendlyCouples(imgLeft, imgRight, n, **kwargs):
+
+        Log.debug("Recherche des couples amis")
 
         # Chargement de l'analyseur
         panoramaAnalyzer = kwargs.get("panorama_analyzer", None)
