@@ -268,7 +268,7 @@ class ExtremaDetector:
                 A = (A + 2 * np.pi) % (2 * np.pi)  # Opération permettant de revenir dans l'interval [0:2pi]
 
                 # On fait l'étude sur chaque carrés de coté 4x4 contenus dans la zone de travail
-                H_angle = np.linspace(0, 360, 8)
+                H_angle = np.linspace(0, 2 * np.pi, 8)
                 H_container = []
                 for i in range(4):
                     for j in range(4):
@@ -277,12 +277,13 @@ class ExtremaDetector:
                         Ms = M[i * 4:i * 4 + 4, j * 4:j * 4 + 4]
 
                         Mf, Af = Ms.flat, As.flat
-                        H = [0] * 8
+
+                        H = [0.0] * 8
 
                         for k, angle in enumerate(As.flat):
                             for l, an in enumerate(H_angle):
                                 if angle < an:
-                                    H[l] += Mf[k]
+                                    H[l] += float(Mf[k])
                                     break
 
                         H_container.append(H)
@@ -294,17 +295,19 @@ class ExtremaDetector:
 
                 H_final = np.array(H_final)
                 # On normalise
-                H_final = H_final / np.max(H_final)
+                H_final = H_final / float(np.max(H_final))
 
                 # On plafonne a 0.2
                 for k in range(len(H_final)):
                     if H_final[k] > 0.2:
                         H_final[k] = 0.2
 
-                # On renormalise
-                H_final = H_final / np.max(H_final)
+                #  On renormalise
+                H_final = H_final / float(np.max(H_final))
 
                 descripteur = np.concatenate((np.array([row, col]), H_final))
                 descripteurs.append(descripteur)
+
+        print(descripteurs)
 
         return descripteurs
