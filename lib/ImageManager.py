@@ -71,22 +71,28 @@ class ImageManager:
         rows, cols = ImageManager.getDimensions(image)
         point_color = [int(keypoint[2] * 1000) % 256, int(keypoint[2] * 333) % 256, int(keypoint[2] * 666) % 256]
 
-        # On dessine la fleche représentant l'orientation du point clé
-        try:
-            kp3 = keypoint[3]
-        except IndexError:
-            kp3 = None
+        # On détermine si l'argument "keypoint" est un descripteur complet ou juste un point clé
+        if len(keypoint) <= 4:
+            try:
+                kp3 = keypoint[3]
+            except IndexError:
+                kp3 = None
 
-        if kp3 is not None:
-            radius = (keypoint[2] ** 1.5) * 4 * min(cols, rows) / 1024
-            image = cv2.circle(image, (keypoint[1], keypoint[0]), int(radius), point_color, 2)
-            image = cv2.arrowedLine(image,
-                             (keypoint[1], keypoint[0]),
-                             (keypoint[1] + int(np.cos(keypoint[3]) * radius),
-                              keypoint[0] - int(np.sin(keypoint[3]) * radius)),
-                             point_color, 2)
+            if kp3 is not None:
+                radius = (keypoint[2] ** 1.5) * 4 * min(cols, rows) / 1024
+                image = cv2.circle(image, (keypoint[1], keypoint[0]), int(radius), point_color, 2)
+
+                # On dessine la fleche représentant l'orientation du point clé
+                image = cv2.arrowedLine(image,
+                                 (int(keypoint[1]), int(keypoint[0])),
+                                 (int(keypoint[1]) + int(np.cos(keypoint[3]) * radius),
+                                  int(keypoint[0]) - int(np.sin(keypoint[3]) * radius)),
+                                 point_color, 2)
+            else:
+                image = cv2.circle(image, (int(keypoint[1]), int(keypoint[0])), int(keypoint[2]) + 1, point_color, 5)
         else:
-            image = cv2.circle(image, (keypoint[1], keypoint[0]), int(keypoint[2]) + 1, point_color, 5)
+            radius = 10 * min(cols, rows) / 1024
+            image = cv2.circle(image, (int(keypoint[1]), int(keypoint[0])), int(radius), point_color, 2)
 
         return image
 

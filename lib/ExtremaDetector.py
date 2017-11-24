@@ -253,7 +253,6 @@ class ExtremaDetector:
                 image_travail = ImageManager.rotate(image_initiale, -a * 180 / np.pi, (row, col))
 
                 # On dessine un carré de coté 16x16
-                zone_etude = image_travail[row - 8:row + 8, col - 8:col + 8]
                 zone_etude_g = image_travail[(row - 8):(row + 8), (col - 8) - 1:(col + 8) - 1]
                 zone_etude_d = image_travail[(row - 8):(row + 8), (col - 8) + 1:(col + 8) + 1]
                 zone_etude_h = image_travail[(row - 8) - 1:(row + 8) - 1, (col - 8):(col + 8)]

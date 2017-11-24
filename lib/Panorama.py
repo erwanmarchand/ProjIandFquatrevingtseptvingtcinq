@@ -4,6 +4,7 @@ from lib.analysis.PyramidAnalyzer import *
 from lib.debug.Log import *
 
 import numpy as np
+import copy
 
 
 class Panorama:
@@ -25,7 +26,8 @@ class Panorama:
 
         # On vérifie que le nombre d'octave n'st pas trop grand
         octave_debug = min(int(np.log2(imgLeftGreyscale.shape[0])), int(np.log2(imgLeftGreyscale.shape[1])), octave)
-        octave_debug = min(int(np.log2(imgRightGreyscale.shape[0])), int(np.log2(imgRightGreyscale.shape[1])), octave_debug)
+        octave_debug = min(int(np.log2(imgRightGreyscale.shape[0])), int(np.log2(imgRightGreyscale.shape[1])),
+                           octave_debug)
 
         if octave_debug != octave:
             Log.info("Le nombre d'octave a été changé à " + str(
@@ -59,10 +61,10 @@ class Panorama:
         #    keypointsRight[i][2] = 3
 
         if panoramaAnalyzer:
-            panoramaAnalyzer.keyPointsLeftPicture = keypointsLeft.copy()
-            panoramaAnalyzer.keyPointsRightPicture = keypointsRight.copy()
+            panoramaAnalyzer.keyPointsLeftPicture = copy.deepcopy(keypointsLeft)
+            panoramaAnalyzer.keyPointsRightPicture = copy.deepcopy(keypointsRight)
 
-        return (keypointsLeft, keypointsRight)
+        return keypointsLeft, keypointsRight
 
     @staticmethod
     def distanceInterPoints(points_image1, points_image2, **kwargs):
@@ -102,7 +104,7 @@ class Panorama:
                                                panorama_analyzer=panoramaAnalyzer,
                                                verbose=kwargs.get("verbose", False))
 
-        matrixDistances = distEuc.copy()
+        matrixDistances = copy.deepcopy(distEuc)
 
         maxValue = matrixDistances.max()
 
