@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import copy
+import numpy as np
 
 
 class Utils:
@@ -48,3 +49,12 @@ class Utils:
                 rPoints.append((x, y, sigmas[j]))
 
         return rPoints
+
+    # @staticmethod
+    # def calculateOrientation(image, (row, col)):
+    #     m = np.sqrt((image[row + 1, col] - image[row - 1, col]) ** 2
+    #                   + (image[row, col + 1] - image[row, col - 1]) ** 2)
+    #     theta = np.arctan2((image[row, col + 1] - image[row, col - 1])
+    #                        , (image[row + 1, col] - image[row - 1, col]))
+    #
+    #     return m, (theta + 2 * np.pi) % (2 * np.pi)

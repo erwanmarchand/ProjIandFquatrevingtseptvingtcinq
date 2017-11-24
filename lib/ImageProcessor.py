@@ -14,7 +14,7 @@ class ImageProcessor:
         # On construit la pyramide des gaussiennes
         Log.debug("Construction de la pyramide des DoG")
         DoGs, octaves, sigmas = ExtremaDetector.differenceDeGaussienne(image, s, nb_octaves, **kwargs)
-        realPoints = []
+        points_cles = []
 
         # Chargement de l'analyseur
         pyramidAnalyzer = kwargs.get("pyramid_analyzer", None)
@@ -51,11 +51,12 @@ class ImageProcessor:
                 Log.debug("Nombre de points pour l'octave " + str(i + 1) + " : " + str(len(octavePoints)))
 
             # On ajoute les nouveaux points clés
-            realPoints = Utils.concatenateKeyPoints(octavePoints, realPoints)
+            points_cles = Utils.concatenateKeyPoints(octavePoints, points_cles)
 
         # Chargement de l'analyseur et lancement de l'analyse
         if pyramidAnalyzer:
-            pyramidAnalyzer.keypoints = realPoints
-            pyramidAnalyzer.analyze()
+            pyramidAnalyzer.keypoints = points_cles
 
-        return realPoints
+        descripteurs = ExtremaDetector.descriptionPointsCles(image, points_cles)
+
+        return descripteurs

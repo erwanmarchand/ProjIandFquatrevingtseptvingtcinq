@@ -25,12 +25,8 @@ class Panorama:
 
         # On vérifie que le nombre d'octave n'st pas trop grand
         octave_debug = min(int(np.log2(imgLeftGreyscale.shape[0])), int(np.log2(imgLeftGreyscale.shape[1])), octave)
-        if octave_debug != octave:
-            Log.info("Le nombre d'octave a été changé à " + str(
-                int(octave_debug)) + " afin d'éviter les problèmes de redimensionnement")
-            octave = octave_debug
+        octave_debug = min(int(np.log2(imgRightGreyscale.shape[0])), int(np.log2(imgRightGreyscale.shape[1])), octave_debug)
 
-        octave_debug = min(int(np.log2(imgRightGreyscale.shape[0])), int(np.log2(imgRightGreyscale.shape[1])), octave)
         if octave_debug != octave:
             Log.info("Le nombre d'octave a été changé à " + str(
                 int(octave_debug)) + " afin d'éviter les problèmes de redimensionnement")
