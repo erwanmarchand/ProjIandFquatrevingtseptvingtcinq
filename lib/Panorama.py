@@ -56,8 +56,8 @@ class Panorama:
         def _distanceEuclidean(point1, point2):
 
             result = 0
-            for i in range(2, len(point1)):
-                result = result + ((point1[i] - point2[i]) ** 2)
+            for k in range(2, len(point1)):
+                result = result + ((point1[k] - point2[k]) ** 2)
             result = np.sqrt(result)
             return result
 
@@ -72,12 +72,11 @@ class Panorama:
             for j in range(0, euclideanDist.shape[1]):
                 euclideanDist[i][j] = _distanceEuclidean(points_image1[i], points_image2[j])
 
+
         return euclideanDist
 
     @staticmethod
     def getFriendlyCouples(imgLeft, imgRight, n, **kwargs):
-
-        Log.debug("Recherche des couples amis")
 
         # Chargement de l'analyseur
         panoramaAnalyzer = kwargs.get("panorama_analyzer", None)
@@ -92,6 +91,8 @@ class Panorama:
                                                panorama_analyzer=panoramaAnalyzer,
                                                verbose=kwargs.get("verbose", False))
 
+        Log.debug("Recherche des couples amis")
+
         matrixDistances = copy.deepcopy(distEuc)
 
         maxValue = matrixDistances.max()
@@ -103,7 +104,6 @@ class Panorama:
             jMin = minPosition[1][0]
             friendlyPoints.append((SIFTPointsLeft[iMin], SIFTPointsRight[jMin]))
             matrixDistances[iMin][jMin] = maxValue
-            test = 5
 
         panoramaAnalyzer.friendlyCouples = copy.deepcopy(friendlyPoints)
 
