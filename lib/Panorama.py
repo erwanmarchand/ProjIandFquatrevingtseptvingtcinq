@@ -24,7 +24,7 @@ class Panorama:
         imgLeftGreyscale = ImageManager.getGreyscale(imgLeft)
         imgRightGreyscale = ImageManager.getGreyscale(imgRight)
 
-        # On vérifie que le nombre d'octave n'st pas trop grand
+        # On vérifie que le nombre d'octave n'est pas trop grand
         octave_debug = min(int(np.log2(imgLeftGreyscale.shape[0])), int(np.log2(imgLeftGreyscale.shape[1])), octave)
         octave_debug = min(int(np.log2(imgRightGreyscale.shape[0])), int(np.log2(imgRightGreyscale.shape[1])),
                            octave_debug)
@@ -35,8 +35,6 @@ class Panorama:
             octave = octave_debug
 
         # On applique l'algorithme
-
-        # TODO : decomment next lines and remove DEBUG Ones
         keypointsLeft = ImageProcessor.findKeypoints(imgLeftGreyscale, s, octave,
                                                      verbose=DEBUG,
                                                      pyramid_analyzer=None)
@@ -108,3 +106,22 @@ class Panorama:
         panoramaAnalyzer.friendlyCouples = copy.deepcopy(friendlyPoints)
 
         return friendlyPoints
+
+    @staticmethod
+    def getMatriceA(friendlyPoints) :
+        numberOfFriendlyPoints = len(friendlyPoints)
+        matriceA = []
+        for i in range (0,numberOfFriendlyPoints) :
+            matriceA.append([friendlyPoints[i][0][0],friendlyPoints[i][0][1],1,0,0,0,-friendlyPoints[i][1][0]*friendlyPoints[i][0][0],-friendlyPoints[i][1][0]*friendlyPoints[i][0][1],-friendlyPoints[i][1][0]])
+            matriceA.append([0,0,0,friendlyPoints[i][0][0],friendlyPoints[i][0][1],1,-friendlyPoints[i][1][1]*friendlyPoints[i][0][0],-friendlyPoints[i][1][1]*friendlyPoints[i][0][1],-friendlyPoints[i][1][1]])
+        return matriceA
+
+    @staticmethod
+    def getTransformMatrix(A) :
+        AT = np.transpose(A)
+        B = np.dot(AT,A)
+        (valPropres,vectPropres) = np.linalg.eig(B)
+        Hflatten = vectPropres[:,np.argmin(valPropres)]
+        Hflatten = Hflatten/Hflatten[len(Hflatten)-1]
+        Hnorm = Hflatten.reshape(3,3)
+        return Hnorm

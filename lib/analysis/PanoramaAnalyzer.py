@@ -79,6 +79,8 @@ class PanoramaAnalyzer:
         plt.clf()
         plt.cla()
 
+        Log.debug("Fin génération images")
+
         return fi + 2
 
     @staticmethod
