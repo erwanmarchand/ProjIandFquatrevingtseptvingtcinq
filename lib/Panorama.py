@@ -112,8 +112,15 @@ class Panorama:
         numberOfFriendlyPoints = len(friendlyPoints)
         matriceA = []
         for i in range (0,numberOfFriendlyPoints) :
-            matriceA.append([friendlyPoints[i][0][0],friendlyPoints[i][0][1],1,0,0,0,-friendlyPoints[i][1][0]*friendlyPoints[i][0][0],-friendlyPoints[i][1][0]*friendlyPoints[i][0][1],-friendlyPoints[i][1][0]])
-            matriceA.append([0,0,0,friendlyPoints[i][0][0],friendlyPoints[i][0][1],1,-friendlyPoints[i][1][1]*friendlyPoints[i][0][0],-friendlyPoints[i][1][1]*friendlyPoints[i][0][1],-friendlyPoints[i][1][1]])
+            # Descripteurs sous la forme [ y, x, desc SIFT ]
+            # Image droite (coordonnées de départ des points)
+            xn = friendlyPoints[i][1][1]
+            yn = friendlyPoints[i][1][0]
+            # Image gauche (coordonnées d'arrivée des points)
+            xpn = friendlyPoints[i][0][1]
+            ypn = friendlyPoints[i][0][0]
+            matriceA.append([xn,yn,1,0,0,0,-xpn*xn,-xpn*yn,-xpn])
+            matriceA.append([0,0,0,xn,yn,1,-ypn*xn,-ypn*yn,-ypn])
         return matriceA
 
     @staticmethod
@@ -121,7 +128,9 @@ class Panorama:
         AT = np.transpose(A)
         B = np.dot(AT,A)
         (valPropres,vectPropres) = np.linalg.eig(B)
-        Hflatten = vectPropres[:,np.argmin(valPropres)]
-        Hflatten = Hflatten/Hflatten[len(Hflatten)-1]
-        Hnorm = Hflatten.reshape(3,3)
+        indexValMin = np.argmin(valPropres)
+        Hflatten = vectPropres[:,indexValMin]
+        #Hflatten = vectPropres[indexValMin]
+        HflattenNorm = Hflatten/Hflatten[len(Hflatten)-1]
+        Hnorm = HflattenNorm.reshape(3,3)
         return Hnorm
