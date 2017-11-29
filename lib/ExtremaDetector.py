@@ -154,38 +154,43 @@ class ExtremaDetector:
             H_slice = np.linspace(0, 2 * np.pi, 36 + 1)  # 37 valeurs, donc 36 intervalles
 
             for c in candidats:
-                (x, y, i_sigma) = c
+                (row, col, i_sigma) = c
 
                 # Pour n, on va chercher dans un voisinage de x-n:x+n, y-n:y+n pixels soit (n+1)**2 pixels
                 taille_voisinage = int(sigmas[i_sigma] * 3)
                 H = np.zeros(36)
 
                 # Selection des points du voisinage en faisant attention aux bords
-                xMax, yMax, xMin, yMin = min(height - 1, x + taille_voisinage), \
-                                         min(width - 1, y + taille_voisinage), \
-                                         max(1, x - taille_voisinage), \
-                                         max(1, y - taille_voisinage)
+                rowMax, colMax, rowMin, colMin = min(height - 2, row + taille_voisinage), \
+                                                 min(width - 2, col + taille_voisinage), \
+                                                 max(1, row - taille_voisinage), \
+                                                 max(1, col - taille_voisinage)
 
-                g, d, b, h = octaves[i_sigma][(xMin - 1):(xMax - 1), yMin:yMax], \
-                             octaves[i_sigma][(xMin + 1):(xMax + 1), yMin:yMax], \
-                             octaves[i_sigma][xMin:xMax, (yMin - 1):(yMax - 1)], \
-                             octaves[i_sigma][xMin:xMax, (yMin + 1):(yMax + 1)]
+                g, d, b, h = octaves[i_sigma][(rowMin - 1):(rowMax - 1) + 1, colMin:colMax + 1], \
+                             octaves[i_sigma][(rowMin + 1):(rowMax + 1) + 1, colMin:colMax + 1], \
+                             octaves[i_sigma][rowMin:rowMax + 1, (colMin - 1):(colMax - 1) + 1], \
+                             octaves[i_sigma][rowMin:rowMax + 1, (colMin + 1):(colMax + 1) + 1]
 
                 g1, g2 = d - g, b - h
 
-                # TODO : Fenètre gausienne
-
-                # Calcul des amplitude des gradients et de l'orientation
+                # Calcul des amplitudes des gradients et de l'orientation
                 M = np.sqrt(np.power(g1, 2) + np.power(g2, 2))
                 A = np.arctan2(g1, g2)  # On utilise atan2 comme spécifié dans l'article en anglais
                 A = (A + 2 * np.pi) % (2 * np.pi)  # Opération permettant de revenir dans l'interval [0:2pi]
+
+                # On applique une fenetre gaussienne afin de diminuer les l'impact des points éloignés du point clé
+                gaussian = Filter.createGaussianFilter(taille_voisinage, 1.5 * sigmas[i_sigma])
+                gaussian = gaussian[taille_voisinage - (row - rowMin):taille_voisinage + (rowMax - row) + 1,
+                           taille_voisinage - (col - colMin):taille_voisinage + (colMax - col) + 1]
+
+                M = M * gaussian  # Produit terme à terme
 
                 # Analyse des résultats, on aplatit le carré de matrice pour pouvoir lister les angles
                 Ms, As = M.flat, A.flat
 
                 for k, angle in enumerate(As):
-                    for si in range(36):
-                        if angle <= H_slice[si + 1]:
+                    for si in range(36 + 1):
+                        if H_slice[si] < angle <= H_slice[si + 1]:
                             H[si] += Ms[k]
                             break
 
@@ -196,7 +201,7 @@ class ExtremaDetector:
                         angles.append(H_slice[k + 1])
 
                 for a in angles:
-                    realPoints.append((x, y, i_sigma, a))
+                    realPoints.append((row, col, i_sigma, a))
 
             return realPoints
 
