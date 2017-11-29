@@ -77,8 +77,8 @@ class ExtremaDetector:
 
         # Génération des DoGs normalisés (valeur en 0 et 1)
         DoGsNormalized = []
-        for DoG in DoGs:
-            DoGsNormalized.append(ImageManager.normalizeImage(DoG))
+        for k in range(len(DoGs)):
+            DoGsNormalized.append(ImageManager.normalizeImage(DoG[k]))
 
         def _filtrerPointsContraste():
             Log.debug("Demarrage du filtrage par contraste", 1)
@@ -87,10 +87,10 @@ class ExtremaDetector:
             for i_sigma in range(1, len(DoGs) - 1):
                 # On fait une boucle sur l'ensemble des pixels, bords exclus afin de ne pas avoir a faire du cas par cas
                 Log.debug("Traitement du sigma " + str(i_sigma) + " : " + str(sigmas[i_sigma]), 2)
-                for x in range(1, height - 1):
-                    for y in range(1, width - 1):
-                        if abs(DoGsNormalized[i_sigma][x, y]) > seuil_contraste:
-                            realPoints.append((x, y, i_sigma))
+                for row in range(1, height - 1):
+                    for col in range(1, width - 1):
+                        if abs(DoGsNormalized[i_sigma][row, col]) > seuil_contraste:
+                            realPoints.append((row, col, i_sigma))
 
             return realPoints
 
