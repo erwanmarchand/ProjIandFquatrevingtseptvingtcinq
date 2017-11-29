@@ -22,9 +22,9 @@ class ImageManager:
 
     @staticmethod
     def normalizeImage(image):
-        imageMax = max(abs(np.max(image)), abs(np.min(image)))
-        if imageMax > 1:  # On vérifie que l'image n'est pas déja normalisée
-            return image / imageMax
+        image_max = max(abs(np.max(image)), abs(np.min(image)))
+        if image_max > 1:  # On vérifie que l'image n'est pas déja normalisée
+            return image / image_max
         else:
             return image
 

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-from lib.ImageManager import *
 from lib.analysis.OctaveAnalyzer import *
+from lib.analysis.Analyzer import *
 from lib.Utils import *
 from lib.debug.Log import *
 
@@ -11,13 +11,11 @@ import copy
 import matplotlib
 import matplotlib.pyplot as plt
 
-DPI = 1500
-EXTENSION = "png"
 
-
-class PyramidAnalyzer:
+class PyramidAnalyzer(Analyzer):
     def __init__(self, outpath="out/"):
-        self.outpath = outpath if outpath[-1] == "/" else outpath + "/"
+        Analyzer.__init__(self, outpath)
+
         self.originalPicture = None
         self.greyscalePicture = None
         self.remasteredPicture = None
@@ -46,9 +44,6 @@ class PyramidAnalyzer:
         else:
             raise Exception("Erreur : Mauvaise classe passée en paramètre (type : " + str(type(octaveAnalyzer)) + ")")
 
-    def saveToFile(self, name):
-        plt.savefig(self.outpath + name + "." + EXTENSION, bbox_inches='tight', format=EXTENSION, dpi=DPI)
-
     def analyze(self):
         functions = [
             self.saveCandidats,
@@ -64,13 +59,6 @@ class PyramidAnalyzer:
             i = f(i)
             plt.clf()
             plt.cla()
-
-    @staticmethod
-    def showKeyPoints(image, keypoints):
-        for k, keypoint in enumerate(keypoints):
-            image = ImageManager.showKeyPoint(image, keypoint)
-
-        return image
 
     def savePyramids(self, fi):
         plt.figure(fi + 1)
@@ -108,7 +96,7 @@ class PyramidAnalyzer:
                 candidates = oa.elements[ph]
                 if ph != "kp_after_contrast_limitation":
                     candidates = Utils.adaptKeypoints(candidates, i)
-                    img = PyramidAnalyzer.showKeyPoints(copy.deepcopy(self.originalPicture), candidates)
+                    img = self.showKeyPoints(copy.deepcopy(self.originalPicture), candidates)
                 else:
                     height, width, _ = self.originalPicture.shape
                     img = np.zeros((oa.octaveHeight, oa.octaveWidth))
@@ -142,7 +130,7 @@ class PyramidAnalyzer:
             candidates = Utils.adaptKeypoints(candidates, i)
             candidates = Utils.adaptSigmas(candidates, self.sigmas)
 
-            img = PyramidAnalyzer.showKeyPoints(copy.deepcopy(self.originalPicture), candidates)
+            img = self.showKeyPoints(copy.deepcopy(self.originalPicture), candidates)
             plt.imshow(img)
             plt.title("Octave " + str(i + 1) + " - " + str(len(oa.finalKeypoints)))
 
@@ -158,7 +146,7 @@ class PyramidAnalyzer:
         plt.figure(fi + 1)
 
         candidates = self.keypoints
-        img = PyramidAnalyzer.showKeyPoints(copy.deepcopy(self.originalPicture), candidates)
+        img = self.showKeyPoints(copy.deepcopy(self.originalPicture), candidates)
         plt.imshow(img)
         plt.title("Keypoints - " + str(len(self.keypoints)))
 
@@ -169,5 +157,5 @@ class PyramidAnalyzer:
 
         return fi + 1
 
-    def generateGraph(self, i):
-        return i + 1
+    def generateGraph(self, fi):
+        return fi + 1
