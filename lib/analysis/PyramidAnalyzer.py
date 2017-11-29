@@ -164,6 +164,7 @@ class PyramidAnalyzer(Analyzer):
                                       flags=cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
 
         plt.figure(fi + 1)
+        plt.title("Keypoints - " + str(len(kp)))
         plt.imshow(out_image)
         self.saveToFile("cv2_result")
 
