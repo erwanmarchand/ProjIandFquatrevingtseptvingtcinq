@@ -120,8 +120,8 @@ class ExtremaDetector:
 
             Dx, Dy, Dxx, Dyy, Dxy = {}, {}, {}, {}, {}
 
-            Fx = np.matrix('-1 0 1;-2 0 2;-1 0 1')
-            Fy = np.matrix('1 2 1;0 0 0;-1 -2 -1')
+            Fy = np.matrix('-1 0 1;-2 0 2;-1 0 1')
+            Fx = np.matrix('1 2 1;0 0 0;-1 -2 -1')
 
             for k in range(1, len(DoGs) - 1):
                 Dx[k] = Filter.convolve2D(DoGsNormalized[k], Fx)
@@ -137,12 +137,12 @@ class ExtremaDetector:
                 (row, col, i_sigma) = c
 
                 Tr = Dxx[i_sigma][row, col] + Dyy[i_sigma][row, col]
-                Det = np.dot(Dxx[i_sigma][row, col], Dyy[i_sigma][row, col]) - np.dot(Dxy[i_sigma][row, col], Dxy[i_sigma][row, col])
+                Det = (Dxx[i_sigma][row, col] * Dyy[i_sigma][row, col]) - (Dxy[i_sigma][row, col] ** 2)
 
                 R = (Tr ** 2) / Det
 
                 rapport = ((r_courb_principale + 1) ** 2) / r_courb_principale
-                if abs(R) < rapport:
+                if abs(R) > rapport:
                     realPoints.append(c)
 
             return realPoints
