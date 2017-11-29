@@ -29,6 +29,10 @@ class Analyzer:
         # Lancement de l'analyse
         i = 1
         for f in self.getFunctions():
-            i = f(i)
-            plt.clf()
-            plt.cla()
+            try:
+                i = f(i)
+                plt.clf()
+                plt.cla()
+            except Exception as e:
+                print(e.message)
+                continue

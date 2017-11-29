@@ -157,7 +157,10 @@ class PyramidAnalyzer(Analyzer):
         gray = cv2.cvtColor(self.originalPictureOriginalSize, cv2.COLOR_RGB2GRAY)
         sift = cv2.xfeatures2d.SIFT_create()
         kp = sift.detect(gray, None)
-        out_image = cv2.drawKeypoints(gray, kp, self.originalPictureOriginalSize)
+        out_image = cv2.drawKeypoints(gray,
+                                      kp,
+                                      self.originalPictureOriginalSize,
+                                      flags=cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
 
         plt.figure(fi + 1)
         plt.imshow(out_image)
