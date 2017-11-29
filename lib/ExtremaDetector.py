@@ -99,17 +99,17 @@ class ExtremaDetector:
             extremums = []
 
             for c in candidats:
-                (x, y, i_sigma) = c
+                (row, col, i_sigma) = c
                 neighbours = []
 
-                neighbours += [DoGs[i_sigma - 1][x - 1:x + 2, y - 1:y + 2]]
-                neighbours += [DoGs[i_sigma][x - 1:x + 2, y - 1:y + 2]]
-                neighbours += [DoGs[i_sigma + 1][x - 1:x + 2, y - 1:y + 2]]
+                neighbours += [DoGs[i_sigma - 1][row - 1:row + 2, col - 1:col + 2]]
+                neighbours += [DoGs[i_sigma][row - 1:row + 2, col - 1:col + 2]]
+                neighbours += [DoGs[i_sigma + 1][row - 1:row + 2, col - 1:col + 2]]
 
                 neighbours = np.array(neighbours).flat
 
                 # Si le point est effectivement le maximum de la region, c'est un point candidat
-                if DoGs[i_sigma][x, y] == np.max(neighbours) or DoGs[i_sigma][x, y] == np.min(neighbours):
+                if DoGs[i_sigma][row, col] == np.max(neighbours) or DoGs[i_sigma][row, col] == np.min(neighbours):
                     extremums.append(c)
 
             return extremums
@@ -134,10 +134,10 @@ class ExtremaDetector:
 
             # On calcul la Hessienne
             for c in candidats:
-                (x, y, i_sigma) = c
+                (row, col, i_sigma) = c
 
-                Tr = Dxx[i_sigma][x, y] + Dyy[i_sigma][x, y]
-                Det = (Dxx[i_sigma][x, y] * Dyy[i_sigma][x, y]) - (Dxy[i_sigma][x, y] ** 2)
+                Tr = Dxx[i_sigma][row, col] + Dyy[i_sigma][row, col]
+                Det = (Dxx[i_sigma][row, col] * Dyy[i_sigma][row, col]) - (Dxy[i_sigma][row, col] ** 2)
 
                 R = (Tr ** 2) / Det
 
@@ -156,7 +156,7 @@ class ExtremaDetector:
             for c in candidats:
                 (row, col, i_sigma) = c
 
-                # Pour n, on va chercher dans un voisinage de x-n:x+n, y-n:y+n pixels soit (n+1)**2 pixels
+                # Pour n, on va chercher dans un voisinage de row-n:row+n, col-n:col+n pixels soit (n+1)**2 pixels
                 taille_voisinage = int(sigmas[i_sigma] * 3)
                 H = np.zeros(36)
 
