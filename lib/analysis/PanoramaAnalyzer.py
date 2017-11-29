@@ -26,17 +26,10 @@ class PanoramaAnalyzer(Analyzer):
             # On creer le dossier de sortie si il n'existe pas
             os.makedirs(outpath)
 
-    def analyze(self):
-        functions = [
+    def getFunctions(self):
+        return [
             self.saveFriendlyCouples
         ]
-
-        # Lancement de l'analyse
-        i = 1
-        for f in functions:
-            i = f(i)
-            plt.clf()
-            plt.cla()
 
     def saveFriendlyCouples(self, fi):
         Log.debug("Génération des images avec couples de points clés amis")

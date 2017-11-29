@@ -10,6 +10,7 @@ import os
 import copy
 import matplotlib
 import matplotlib.pyplot as plt
+import cv2
 
 
 class PyramidAnalyzer(Analyzer):
@@ -17,6 +18,7 @@ class PyramidAnalyzer(Analyzer):
         Analyzer.__init__(self, outpath)
 
         self.originalPicture = None
+        self.originalPictureOriginalSize = None
         self.greyscalePicture = None
         self.remasteredPicture = None
 
@@ -44,21 +46,15 @@ class PyramidAnalyzer(Analyzer):
         else:
             raise Exception("Erreur : Mauvaise classe passée en paramètre (type : " + str(type(octaveAnalyzer)) + ")")
 
-    def analyze(self):
-        functions = [
+    def getFunctions(self):
+        return [
             self.saveCandidats,
             self.savePyramids,
             self.saveOctaves,
             self.generateGraph,
-            self.saveFinal
+            self.saveFinal,
+            self.saveCv2Sift
         ]
-
-        # Lancement de l'analyse
-        i = 1
-        for f in functions:
-            i = f(i)
-            plt.clf()
-            plt.cla()
 
     def savePyramids(self, fi):
         plt.figure(fi + 1)
@@ -154,6 +150,18 @@ class PyramidAnalyzer(Analyzer):
         self.saveToFile("final")
         plt.clf()
         plt.cla()
+
+        return fi + 1
+
+    def saveCv2Sift(self, fi):
+        gray = cv2.cvtColor(self.originalPictureOriginalSize, cv2.COLOR_RGB2GRAY)
+        sift = cv2.xfeatures2d.SIFT_create()
+        kp = sift.detect(gray, None)
+        out_image = cv2.drawKeypoints(gray, kp, self.originalPictureOriginalSize)
+
+        plt.figure(fi + 1)
+        plt.imshow(out_image)
+        self.saveToFile("cv2_result")
 
         return fi + 1
 

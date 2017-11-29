@@ -21,3 +21,14 @@ class Analyzer:
                     bbox_inches='tight',
                     format=self.SAVE_EXTENSION,
                     dpi=self.SAVE_DPI)
+
+    def getFunctions(self):
+        return []
+
+    def analyze(self):
+        # Lancement de l'analyse
+        i = 1
+        for f in self.getFunctions():
+            i = f(i)
+            plt.clf()
+            plt.cla()

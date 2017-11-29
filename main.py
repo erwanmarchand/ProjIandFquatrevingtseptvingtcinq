@@ -21,17 +21,18 @@ Log.debug("Démarrage...")
 Log.debug("Chargement de l'image")
 imgWithColor = ImageManager.loadMatrix(IMAGES_PATH + NAME_PICTURE)
 Log.debug("Image chargée. Redimensionnement de l'image")
-imgWithColor = ImageManager.getOctave(imgWithColor, -1)
+imgWithColorDoubled = ImageManager.getOctave(imgWithColor, -1)
 
 # On convertit l'image en nuances de gris pour travailler dessus
 Log.debug("Conversion de l'image en niveaux de gris")
-imgGreyscale = ImageManager.getGreyscale(imgWithColor)
+imgGreyscale = ImageManager.getGreyscale(imgWithColorDoubled)
 
 # On charge un analyseur afin de récolter des données sur notre script
 if ANALYSIS:
     Log.debug("Chargement de l'analyseur")
     analyzer = PyramidAnalyzer("out/")
-    analyzer.originalPicture = imgWithColor
+    analyzer.originalPicture = imgWithColorDoubled
+    analyzer.originalPictureOriginalSize = imgWithColor
     analyzer.greyscalePicture = imgGreyscale
 else:
     analyzer = None
