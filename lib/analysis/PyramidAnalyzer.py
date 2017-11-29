@@ -154,6 +154,7 @@ class PyramidAnalyzer(Analyzer):
         return fi + 1
 
     def saveCv2Sift(self, fi):
+        Log.debug("Génération de l'image de SIFT par OpenCV")
         gray = cv2.cvtColor(self.originalPictureOriginalSize, cv2.COLOR_RGB2GRAY)
         sift = cv2.xfeatures2d.SIFT_create()
         kp = sift.detect(gray, None)
