@@ -8,8 +8,8 @@ import lib.debug.Log as Log_file
 import numpy as np
 
 IMAGES_PATH = "images/"
-NAME_IMAGE_GAUCHE = 'lena2left.jpg'
-NAME_IMAGE_DROITE = 'lena2right.jpg'
+NAME_IMAGE_GAUCHE = 'gauche.jpg'
+NAME_IMAGE_DROITE = 'droite.jpg'
 
 ANALYSIS = True
 DEBUG = True
@@ -33,7 +33,7 @@ if ANALYSIS:
 else:
     analyzer = None
 
-# On crée le panorama
+# On créer le panorama
 
 minValues = Panorama.getFriendlyCouples(imgGaucheWithColor, imgDroiteWithColor, 4, verbose=DEBUG, panorama_analyzer=analyzer)
 

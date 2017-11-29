@@ -142,7 +142,7 @@ class ExtremaDetector:
                 R = (Tr ** 2) / Det
 
                 rapport = ((r_courb_principale + 1) ** 2) / r_courb_principale
-                if R < rapport:
+                if abs(R) < rapport:
                     realPoints.append(c)
 
             return realPoints
@@ -307,7 +307,5 @@ class ExtremaDetector:
 
                 descripteur = np.concatenate((np.array([row, col]), H_final))
                 descripteurs.append(descripteur)
-
-        print(descripteurs)
 
         return descripteurs

@@ -7,9 +7,7 @@ import lib.debug.Log as Log_file
 import numpy as np
 
 IMAGES_PATH = "images/"
-NAME_PICTURE = 'lena2.jpg'
-NAME_IMAGE_GAUCHE = 'gauche.jpg'
-NAME_IMAGE_DROITE = 'droite.jpg'
+NAME_PICTURE = 'notre-dame.png'
 
 ANALYSIS = True
 DEBUG = True
@@ -49,3 +47,5 @@ if octave_debug != octave:
 keypoints = ImageProcessor.findKeypoints(imgGreyscale, s, octave,
                                          verbose=DEBUG,
                                          pyramid_analyzer=analyzer)
+
+analyzer.analyze()

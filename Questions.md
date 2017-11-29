@@ -1,3 +1,5 @@
 - Comment construire la pyramide des octaves
 - Comment utiliser la hessienne ? Qu'elle rth choisir ?
 - Qu'elle taille pour le voisinage dans l'assignation d'orientation
+
+- Faut-il mettre une valeur absolu dans la hessienne ?
