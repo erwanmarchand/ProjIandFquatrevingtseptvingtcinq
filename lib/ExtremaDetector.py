@@ -78,7 +78,7 @@ class ExtremaDetector:
         # Génération des DoGs normalisés (valeur en 0 et 1)
         DoGsNormalized = []
         for k in range(len(DoGs)):
-            DoGsNormalized.append(ImageManager.normalizeImage(DoG[k]))
+            DoGsNormalized.append(ImageManager.normalizeImage(DoGs[k]))
 
         def _filtrerPointsContraste():
             Log.debug("Demarrage du filtrage par contraste", 1)
