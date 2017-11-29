@@ -24,7 +24,7 @@ class Panorama:
         imgLeftGreyscale = ImageManager.getGreyscale(imgLeft)
         imgRightGreyscale = ImageManager.getGreyscale(imgRight)
 
-        # On vérifie que le nombre d'octave n'st pas trop grand
+        # On vérifie que le nombre d'octave n'est pas trop grand
         octave_debug = min(int(np.log2(imgLeftGreyscale.shape[0])), int(np.log2(imgLeftGreyscale.shape[1])), octave)
         octave_debug = min(int(np.log2(imgRightGreyscale.shape[0])), int(np.log2(imgRightGreyscale.shape[1])),
                            octave_debug)
@@ -35,8 +35,6 @@ class Panorama:
             octave = octave_debug
 
         # On applique l'algorithme
-
-        # TODO : decomment next lines and remove DEBUG Ones
         keypointsLeft = ImageProcessor.findKeypoints(imgLeftGreyscale, s, octave,
                                                      verbose=DEBUG,
                                                      pyramid_analyzer=None)
@@ -44,27 +42,11 @@ class Panorama:
                                                       verbose=DEBUG,
                                                       pyramid_analyzer=None)
 
-        # DEBUG
-        # keypointsLeft = np.trunc(1000 * np.random.rand(10,130))
-        # keypointsRight = np.trunc(1000 *  np.random.rand(15,130))
-        # for i in range(0, 4):
-        #    keypointsLeft[i] = keypointsRight[i]
-        #    keypointsLeft[i][3] = 4
-        #    keypointsLeft[i][1] = keypointsRight[i][1] + 1000 
-        # keypointsLeft[0] = keypointsRight[5]
-        # keypointsLeft[0][1] = keypointsRight[5][1] + 1000
-        # keypointsLeft = keypointsLeft.astype(int)
-        # keypointsRight = keypointsRight.astype(int)
-        # for i in range(0, 10):
-        #    keypointsLeft[i][2] = 3
-        # for i in range(0, 15):
-        #    keypointsRight[i][2] = 3
-
         if panoramaAnalyzer:
             panoramaAnalyzer.keyPointsLeftPicture = copy.deepcopy(keypointsLeft)
             panoramaAnalyzer.keyPointsRightPicture = copy.deepcopy(keypointsRight)
 
-        return keypointsLeft, keypointsRight
+        return (keypointsLeft, keypointsRight)
 
     @staticmethod
     def distanceInterPoints(points_image1, points_image2, **kwargs):
@@ -72,19 +54,22 @@ class Panorama:
         def _distanceEuclidean(point1, point2):
 
             result = 0
-            for i in range(2, len(point1)):
-                result = result + ((point1[i] - point2[i]) ** 2)
+            for k in range(2, len(point1)):
+                result = result + ((point1[k] - point2[k]) ** 2)
             result = np.sqrt(result)
             return result
 
         nbrKeyPointsImgLeft = len(points_image1)
         nbrKeyPointsImgRight = len(points_image2)
 
+        Log.debug("Calcul de la matrice de taille : "+str(nbrKeyPointsImgLeft)+" x "+str(nbrKeyPointsImgRight)+" des distances entre points clés")
+
         euclideanDist = np.zeros((nbrKeyPointsImgLeft, nbrKeyPointsImgRight))
 
         for i in range(0, euclideanDist.shape[0]):
             for j in range(0, euclideanDist.shape[1]):
                 euclideanDist[i][j] = _distanceEuclidean(points_image1[i], points_image2[j])
+
 
         return euclideanDist
 
@@ -104,6 +89,8 @@ class Panorama:
                                                panorama_analyzer=panoramaAnalyzer,
                                                verbose=kwargs.get("verbose", False))
 
+        Log.debug("Recherche des couples amis")
+
         matrixDistances = copy.deepcopy(distEuc)
 
         maxValue = matrixDistances.max()
@@ -119,3 +106,31 @@ class Panorama:
         panoramaAnalyzer.friendlyCouples = copy.deepcopy(friendlyPoints)
 
         return friendlyPoints
+
+    @staticmethod
+    def getMatriceA(friendlyPoints) :
+        numberOfFriendlyPoints = len(friendlyPoints)
+        matriceA = []
+        for i in range (0,numberOfFriendlyPoints) :
+            # Descripteurs sous la forme [ y, x, desc SIFT ]
+            # Image droite (coordonnées de départ des points)
+            xn = friendlyPoints[i][1][1]
+            yn = friendlyPoints[i][1][0]
+            # Image gauche (coordonnées d'arrivée des points)
+            xpn = friendlyPoints[i][0][1]
+            ypn = friendlyPoints[i][0][0]
+            matriceA.append([xn,yn,1,0,0,0,-xpn*xn,-xpn*yn,-xpn])
+            matriceA.append([0,0,0,xn,yn,1,-ypn*xn,-ypn*yn,-ypn])
+        return matriceA
+
+    @staticmethod
+    def getTransformMatrix(A) :
+        AT = np.transpose(A)
+        B = np.dot(AT,A)
+        (valPropres,vectPropres) = np.linalg.eig(B)
+        indexValMin = np.argmin(valPropres)
+        Hflatten = vectPropres[:,indexValMin]
+        #Hflatten = vectPropres[indexValMin]
+        HflattenNorm = Hflatten/Hflatten[len(Hflatten)-1]
+        Hnorm = HflattenNorm.reshape(3,3)
+        return Hnorm

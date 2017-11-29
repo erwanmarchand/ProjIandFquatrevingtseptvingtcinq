@@ -66,6 +66,7 @@ class Log:
 
     @staticmethod
     def warn(msg, *args):
+        indentation = args[0] if len(args) > 0 else 0
         Log._log(WARN, msg, indentation)
 
     @staticmethod
