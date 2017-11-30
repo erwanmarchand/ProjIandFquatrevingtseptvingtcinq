@@ -32,7 +32,7 @@ class ImageProcessor:
                 DoGs[i],
                 octaves[i],
                 sigmas,
-                0.20,
+                0.40,
                 7.5,
                 1 / (2 ** i),
                 i,

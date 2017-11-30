@@ -65,7 +65,7 @@ class Panorama:
 
         for i in range(0, euclidean_dist.shape[0]):
             if i % int(euclidean_dist.shape[0] / 20) == 0:
-                Log.debug(str(round(i/euclidean_dist.shape[0] * 100, 2)) + " %", 1)
+                Log.debug(str(round(float(i) / float(euclidean_dist.shape[0]) * 100, 2)) + " %", 1)
 
             for j in range(0, euclidean_dist.shape[1]):
                 if i == j:
@@ -87,8 +87,8 @@ class Panorama:
                                                                    verbose=kwargs.get("verbose", False))
 
         matrixDistances = Panorama.distanceInterPoints(SIFTPointsLeft, SIFTPointsRight,
-                                               panorama_analyzer=panoramaAnalyzer,
-                                               verbose=kwargs.get("verbose", False))
+                                                       panorama_analyzer=panoramaAnalyzer,
+                                                       verbose=kwargs.get("verbose", False))
 
         Log.debug("Recherche des couples amis")
 
