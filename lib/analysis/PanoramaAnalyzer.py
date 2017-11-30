@@ -20,6 +20,8 @@ class PanoramaAnalyzer(Analyzer):
 
         self.friendlyCouples = []
 
+        self.colors = [[0, 255, 255],[0, 255, 0],[255, 0, 255],[255, 255, 0]]
+
         matplotlib.rcParams.update({'font.size': 5})
 
         if not os.path.exists(outpath):
@@ -42,7 +44,7 @@ class PanoramaAnalyzer(Analyzer):
             candidatesLeft.append(self.friendlyCouples[i][0])
             candidatesRight.append(self.friendlyCouples[i][1])
 
-        img = self.showKeyPoints(copy.deepcopy(self.originalLeftPicture), candidatesLeft)
+        img = self.showKeyPoints(copy.deepcopy(self.originalLeftPicture), candidatesLeft, colors=self.colors)
         plt.imshow(img)
         plt.title("Keypoints - " + str(len(self.friendlyCouples)))
 
@@ -53,7 +55,7 @@ class PanoramaAnalyzer(Analyzer):
 
         plt.figure(fi + 2)
 
-        img = self.showKeyPoints(copy.deepcopy(self.originalRightPicture), candidatesRight)
+        img = self.showKeyPoints(copy.deepcopy(self.originalRightPicture), candidatesRight, colors=self.colors)
         plt.imshow(img)
         plt.title("Keypoints - " + str(len(self.friendlyCouples)))
 

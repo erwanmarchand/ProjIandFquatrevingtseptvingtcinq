@@ -8,8 +8,8 @@ import lib.debug.Log as Log_file
 import numpy as np
 
 IMAGES_PATH = "images/"
-NAME_IMAGE_GAUCHE = 'gauche.jpg'
-NAME_IMAGE_DROITE = 'droite.jpg'
+NAME_IMAGE_GAUCHE = 'lena2left.jpg'
+NAME_IMAGE_DROITE = 'lena2right.jpg'
 
 ANALYSIS = True
 DEBUG = True
