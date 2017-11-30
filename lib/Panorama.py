@@ -68,10 +68,8 @@ class Panorama:
                 Log.debug(str(round(float(i) / float(euclidean_dist.shape[0]) * 100, 2)) + " %", 1)
 
             for j in range(0, euclidean_dist.shape[1]):
-                if i == j:
-                    euclidean_dist[i][i] = 0.0
-                else:
-                    euclidean_dist[i][j] = _distanceEuclidean(points_image1[i], points_image2[j])
+
+                euclidean_dist[i][j] = _distanceEuclidean(points_image1[i], points_image2[j])
 
         return euclidean_dist
 
