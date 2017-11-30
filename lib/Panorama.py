@@ -50,28 +50,28 @@ class Panorama:
 
     @staticmethod
     def distanceInterPoints(points_image1, points_image2, **kwargs):
-
         def _distanceEuclidean(point1, point2):
+            D = np.power((point1[2::] - point2[2::]), 2)
+            result = np.sqrt(np.sum(D))
 
-            result = 0
-            for k in range(2, len(point1)):
-                result = result + ((point1[k] - point2[k]) ** 2)
-            result = np.sqrt(result)
             return result
 
-        nbrKeyPointsImgLeft = len(points_image1)
-        nbrKeyPointsImgRight = len(points_image2)
+        nbr_key_points_img_left, nbr_key_points_img_right = len(points_image1), len(points_image2)
 
-        Log.debug("Calcul de la matrice de taille : "+str(nbrKeyPointsImgLeft)+" x "+str(nbrKeyPointsImgRight)+" des distances entre points clés")
+        Log.debug("Calcul de la matrice de taille : " + str(nbr_key_points_img_left) + " x "
+                  + str(nbr_key_points_img_right) + " des distances entre points clés")
 
-        euclideanDist = np.zeros((nbrKeyPointsImgLeft, nbrKeyPointsImgRight))
+        euclidean_dist = np.zeros((nbr_key_points_img_left, nbr_key_points_img_right))
 
-        for i in range(0, euclideanDist.shape[0]):
-            for j in range(0, euclideanDist.shape[1]):
-                euclideanDist[i][j] = _distanceEuclidean(points_image1[i], points_image2[j])
+        for i in range(0, euclidean_dist.shape[0]):
+            for j in range(i, euclidean_dist.shape[1]):
+                if i == j:
+                    euclidean_dist[i][i] = 0.0
+                else:
+                    euclidean_dist[i][j] = _distanceEuclidean(points_image1[i], points_image2[j])
+                    euclidean_dist[j][i] = euclidean_dist[i][j]
 
-
-        return euclideanDist
+        return euclidean_dist
 
     @staticmethod
     def getFriendlyCouples(imgLeft, imgRight, n, **kwargs):
@@ -108,10 +108,10 @@ class Panorama:
         return friendlyPoints
 
     @staticmethod
-    def getMatriceA(friendlyPoints) :
+    def getMatriceA(friendlyPoints):
         numberOfFriendlyPoints = len(friendlyPoints)
         matriceA = []
-        for i in range (0,numberOfFriendlyPoints) :
+        for i in range(0, numberOfFriendlyPoints):
             # Descripteurs sous la forme [ y, x, desc SIFT ]
             # Image droite (coordonnées de départ des points)
             xn = friendlyPoints[i][1][1]
@@ -119,18 +119,18 @@ class Panorama:
             # Image gauche (coordonnées d'arrivée des points)
             xpn = friendlyPoints[i][0][1]
             ypn = friendlyPoints[i][0][0]
-            matriceA.append([xn,yn,1,0,0,0,-xpn*xn,-xpn*yn,-xpn])
-            matriceA.append([0,0,0,xn,yn,1,-ypn*xn,-ypn*yn,-ypn])
+            matriceA.append([xn, yn, 1, 0, 0, 0, -xpn * xn, -xpn * yn, -xpn])
+            matriceA.append([0, 0, 0, xn, yn, 1, -ypn * xn, -ypn * yn, -ypn])
         return matriceA
 
     @staticmethod
-    def getTransformMatrix(A) :
+    def getTransformMatrix(A):
         AT = np.transpose(A)
-        B = np.dot(AT,A)
-        (valPropres,vectPropres) = np.linalg.eig(B)
+        B = np.dot(AT, A)
+        (valPropres, vectPropres) = np.linalg.eig(B)
         indexValMin = np.argmin(valPropres)
-        Hflatten = vectPropres[:,indexValMin]
-        #Hflatten = vectPropres[indexValMin]
-        HflattenNorm = Hflatten/Hflatten[len(Hflatten)-1]
-        Hnorm = HflattenNorm.reshape(3,3)
+        Hflatten = vectPropres[:, indexValMin]
+        # Hflatten = vectPropres[indexValMin]
+        HflattenNorm = Hflatten / Hflatten[len(Hflatten) - 1]
+        Hnorm = HflattenNorm.reshape(3, 3)
         return Hnorm
