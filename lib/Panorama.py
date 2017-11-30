@@ -75,7 +75,6 @@ class Panorama:
 
     @staticmethod
     def getFriendlyCouples(imgLeft, imgRight, n, **kwargs):
-
         # Chargement de l'analyseur
         panoramaAnalyzer = kwargs.get("panorama_analyzer", None)
 
@@ -96,12 +95,13 @@ class Panorama:
         for index in range(0, n):
             minValue = matrixDistances.min()
             minPosition = np.where(matrixDistances == minValue)
-            iMin = minPosition[0][0]
-            jMin = minPosition[1][0]
+            iMin, jMin = minPosition[0][0], minPosition[1][0]
+
             friendlyPoints.append((SIFTPointsLeft[iMin], SIFTPointsRight[jMin]))
             matrixDistances[iMin][jMin] = maxValue
 
-        panoramaAnalyzer.friendlyCouples = copy.deepcopy(friendlyPoints)
+        if panoramaAnalyzer:
+            panoramaAnalyzer.friendlyCouples = copy.deepcopy(friendlyPoints)
 
         return friendlyPoints
 
