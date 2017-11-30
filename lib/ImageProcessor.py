@@ -57,6 +57,7 @@ class ImageProcessor:
         if pyramidAnalyzer:
             pyramidAnalyzer.keypoints = points_cles
 
+        Log.debug("Nombre total de points clés : " + str(len(points_cles)))
         Log.debug("Calcul des descripteurs....")
         descripteurs = ExtremaDetector.descriptionPointsCles(image, points_cles)
 
