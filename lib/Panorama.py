@@ -85,13 +85,11 @@ class Panorama:
                                                                    panorama_analyzer=panoramaAnalyzer,
                                                                    verbose=kwargs.get("verbose", False))
 
-        distEuc = Panorama.distanceInterPoints(SIFTPointsLeft, SIFTPointsRight,
+        matrixDistances = Panorama.distanceInterPoints(SIFTPointsLeft, SIFTPointsRight,
                                                panorama_analyzer=panoramaAnalyzer,
                                                verbose=kwargs.get("verbose", False))
 
         Log.debug("Recherche des couples amis")
-
-        matrixDistances = copy.deepcopy(distEuc)
 
         maxValue = matrixDistances.max()
 
