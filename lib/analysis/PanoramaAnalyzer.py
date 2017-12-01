@@ -18,6 +18,8 @@ class PanoramaAnalyzer(Analyzer):
         self.originalRightPicture = None
         self.keyPointsRightPicture = []
 
+        self.finalPicture = None
+
         self.friendlyCouples = []
 
         self.colors = [[0, 255, 255],[0, 255, 0],[255, 0, 255],[255, 255, 0]]
@@ -30,7 +32,8 @@ class PanoramaAnalyzer(Analyzer):
 
     def getFunctions(self):
         return [
-            self.saveFriendlyCouples
+            self.saveFriendlyCouples,
+            self.saveFinalPicture
         ]
 
     def saveFriendlyCouples(self, fi):
@@ -67,3 +70,20 @@ class PanoramaAnalyzer(Analyzer):
         Log.debug("Fin génération images")
 
         return fi + 2
+
+    def saveFinalPicture(self, fi):
+        Log.debug("Génération de l'image finale")
+        plt.figure(fi + 1)
+
+        img = self.finalPicture
+        plt.imshow(img)
+        plt.title("Panorama generated")
+
+        # Affichage des points par octaves
+        self.saveToFile("Panorama_generated")
+        plt.clf()
+        plt.cla()
+
+        Log.debug("Fin génération image finale")
+
+        return fi + 1
