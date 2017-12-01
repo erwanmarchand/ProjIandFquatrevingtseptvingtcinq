@@ -20,10 +20,10 @@ class Utils:
         for kp in keypoints:
             try:
                 (x, y, j, a) = kp
-                rPoints.append((x * (2 ** octave_nb), y * (2 ** octave_nb), j, a))
+                rPoints.append((int(x * (2 ** octave_nb)), int(y * (2 ** octave_nb)), j, a))
             except ValueError:
                 (x, y, j) = kp
-                rPoints.append((x * (2 ** octave_nb), y * (2 ** octave_nb), j, None))
+                rPoints.append((int(x * (2 ** octave_nb)), int(y * (2 ** octave_nb)), j, None))
 
         return rPoints
 

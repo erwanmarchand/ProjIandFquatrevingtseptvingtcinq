@@ -95,7 +95,7 @@ class ExtremaDetector:
             return realPoints
 
         def _detectionExtremums(candidats):
-            Log.debug("Demarrage de la détéction des extremums", 1)
+            Log.debug("Demarrage de la détection des extremums", 1)
             extremums = []
 
             for c in candidats:

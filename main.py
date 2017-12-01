@@ -7,46 +7,22 @@ import lib.debug.Log as Log_file
 import numpy as np
 
 IMAGES_PATH = "images/"
-NAME_PICTURE = 'gauche.jpg'
+NAME_PICTURE = 'lignes.png'
 
 ANALYSIS = True
 DEBUG = True
 
-s = 3
-octave = 4
+S = 3
+NB_OCTAVE = 1
 
 #  On charge l'image et on la redimensionne
 Log_file.DEBUG_ACTIVATED = DEBUG
 Log.debug("Démarrage...")
 Log.debug("Chargement de l'image")
-imgWithColor = ImageManager.loadMatrix(IMAGES_PATH + NAME_PICTURE)
-Log.debug("Image chargée. Redimensionnement de l'image")
-imgWithColorDoubled = ImageManager.getOctave(imgWithColor, -1)
-
-# On convertit l'image en nuances de gris pour travailler dessus
-Log.debug("Conversion de l'image en niveaux de gris")
-imgGreyscale = ImageManager.getGreyscale(imgWithColorDoubled)
-
-# On charge un analyseur afin de récolter des données sur notre script
-if ANALYSIS:
-    Log.debug("Chargement de l'analyseur")
-    analyzer = PyramidAnalyzer("out/")
-    analyzer.originalPicture = imgWithColorDoubled
-    analyzer.originalPictureOriginalSize = imgWithColor
-    analyzer.greyscalePicture = imgGreyscale
-else:
-    analyzer = None
-
-# On vérifie que le nombre d'octave n'st pas trop grand
-octave_debug = min(int(np.log2(imgGreyscale.shape[0])), int(np.log2(imgGreyscale.shape[1])), octave)
-if octave_debug != octave:
-    Log.info("Le nombre d'octave a été changé à " + str(
-        int(octave_debug)) + " afin d'éviter les problèmes de redimensionnement")
-    octave = octave_debug
+image = ImageManager.loadMatrix(IMAGES_PATH + NAME_PICTURE)
 
 # On applique l'algorithme
-keypoints = ImageProcessor.findKeypoints(imgGreyscale, s, octave,
-                                         verbose=DEBUG,
-                                         pyramid_analyzer=analyzer)
+descriptors, analyzer = ImageProcessor.findKeypoints(image, S, NB_OCTAVE,
+                                                     analysis=ANALYSIS)
 
 analyzer.analyze()

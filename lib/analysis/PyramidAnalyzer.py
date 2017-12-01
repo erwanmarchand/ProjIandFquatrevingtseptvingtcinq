@@ -18,15 +18,16 @@ class PyramidAnalyzer(Analyzer):
         Analyzer.__init__(self, outpath)
 
         self.originalPicture = None
-        self.originalPictureOriginalSize = None
+        self.doubledImage = None
         self.greyscalePicture = None
-        self.remasteredPicture = None
 
         self.sigmas = []
         self.imagePyramid = None
         self.dogPyramid = None
         self.octavesAnalyzers = []
         self.keypoints = []
+
+        self.descriptors = []
 
         matplotlib.rcParams.update({'font.size': 5})
 
@@ -91,18 +92,13 @@ class PyramidAnalyzer(Analyzer):
 
                 candidates = oa.elements[ph]
                 if ph != "kp_after_contrast_limitation":
-                    candidates = Utils.adaptKeypoints(candidates, i)
+                    candidates = Utils.adaptKeypoints(candidates, i - 1)
                     img = self.showKeyPoints(copy.deepcopy(self.originalPicture), candidates)
                 else:
                     height, width, _ = self.originalPicture.shape
                     img = np.zeros((oa.octaveHeight, oa.octaveWidth))
                     for elt in candidates:
-                        try:
-                            x, y, j = elt
-                        except ValueError:
-                            x, y, j, a = elt
-
-                        img[x, y] = 1
+                        img[elt[0], elt[1]] = 1
 
                 candidates = Utils.adaptSigmas(candidates, self.sigmas)
 
@@ -123,7 +119,7 @@ class PyramidAnalyzer(Analyzer):
             plt.subplot(1, len(self.octavesAnalyzers), i + 1)
 
             candidates = oa.finalKeypoints
-            candidates = Utils.adaptKeypoints(candidates, i)
+            candidates = Utils.adaptKeypoints(candidates, i - 1)
             candidates = Utils.adaptSigmas(candidates, self.sigmas)
 
             img = self.showKeyPoints(copy.deepcopy(self.originalPicture), candidates)
@@ -155,12 +151,12 @@ class PyramidAnalyzer(Analyzer):
 
     def saveCv2Sift(self, fi):
         Log.debug("Génération de l'image de SIFT par OpenCV")
-        gray = cv2.cvtColor(self.originalPictureOriginalSize, cv2.COLOR_RGB2GRAY)
+        gray = cv2.cvtColor(self.originalPicture, cv2.COLOR_RGB2GRAY)
         sift = cv2.xfeatures2d.SIFT_create()
         kp = sift.detect(gray, None)
         out_image = cv2.drawKeypoints(gray,
                                       kp,
-                                      self.originalPictureOriginalSize,
+                                      self.originalPicture,
                                       flags=cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
 
         plt.figure(fi + 1)
