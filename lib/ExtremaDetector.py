@@ -142,7 +142,7 @@ class ExtremaDetector:
                 R = (Tr ** 2) / Det
 
                 rapport = ((r_courb_principale + 1) ** 2) / r_courb_principale
-                if abs(R) > rapport:
+                if R < rapport:
                     realPoints.append(c)
 
             return realPoints
@@ -166,7 +166,7 @@ class ExtremaDetector:
                                                  max(1, row - taille_voisinage), \
                                                  max(1, col - taille_voisinage)
 
-                b, h, g, d = octaves[i_sigma][(rowMin - 1):(rowMax - 1) + 1, colMin:colMax + 1], \
+                h, b, g, d = octaves[i_sigma][(rowMin - 1):(rowMax - 1) + 1, colMin:colMax + 1], \
                              octaves[i_sigma][(rowMin + 1):(rowMax + 1) + 1, colMin:colMax + 1], \
                              octaves[i_sigma][rowMin:rowMax + 1, (colMin - 1):(colMax - 1) + 1], \
                              octaves[i_sigma][rowMin:rowMax + 1, (colMin + 1):(colMax + 1) + 1]
