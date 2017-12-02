@@ -13,34 +13,18 @@ class Panorama:
 
     @staticmethod
     def getSIFTPoints(imgLeft, imgRight, **kwargs):
-        s = 3
-        octave = 3
+        s, nb_octaves = 3, 3
 
         # Chargement de l'analyseur
         panoramaAnalyzer = kwargs.get("panorama_analyzer", None)
 
-        # On convertit l'image en nuances de gris pour travailler dessus
-        Log.debug("Conversion des images en niveaux de gris")
-        imgLeftGreyscale = ImageManager.getGreyscale(imgLeft)
-        imgRightGreyscale = ImageManager.getGreyscale(imgRight)
-
-        # On vérifie que le nombre d'octave n'est pas trop grand
-        octave_debug = min(int(np.log2(imgLeftGreyscale.shape[0])), int(np.log2(imgLeftGreyscale.shape[1])), octave)
-        octave_debug = min(int(np.log2(imgRightGreyscale.shape[0])), int(np.log2(imgRightGreyscale.shape[1])),
-                           octave_debug)
-
-        if octave_debug != octave:
-            Log.info("Le nombre d'octave a été changé à " + str(
-                int(octave_debug)) + " afin d'éviter les problèmes de redimensionnement")
-            octave = octave_debug
-
-        # On applique l'algorithme
-        keypointsLeft = ImageProcessor.findKeypoints(imgLeftGreyscale, s, octave,
-                                                     verbose=DEBUG,
-                                                     pyramid_analyzer=None)
-        keypointsRight = ImageProcessor.findKeypoints(imgRightGreyscale, s, octave,
-                                                      verbose=DEBUG,
-                                                      pyramid_analyzer=None)
+        # On applique l'algorithme sur chaque images
+        keypointsLeft, _ = ImageProcessor.findKeypoints(imgLeftGreyscale, s, octave,
+                                                        verbose=DEBUG,
+                                                        pyramid_analyzer=None)
+        keypointsRight, _ = ImageProcessor.findKeypoints(imgRightGreyscale, s, octave,
+                                                         verbose=DEBUG,
+                                                         pyramid_analyzer=None)
 
         if panoramaAnalyzer:
             panoramaAnalyzer.keyPointsLeftPicture = copy.deepcopy(keypointsLeft)
@@ -68,7 +52,6 @@ class Panorama:
                 Log.debug(str(round(float(i) / float(euclidean_dist.shape[0]) * 100, 2)) + " %", 1)
 
             for j in range(0, euclidean_dist.shape[1]):
-
                 euclidean_dist[i][j] = _distanceEuclidean(points_image1[i], points_image2[j])
 
         return euclidean_dist
@@ -134,37 +117,38 @@ class Panorama:
         return Hnorm
 
     @staticmethod
-    def generatePanorama(leftPicture,rightPicture,homographyMatrix, **kwargs):
+    def generatePanorama(leftPicture, rightPicture, homographyMatrix, **kwargs):
         # Chargement de l'analyseur
         panoramaAnalyzer = kwargs.get("panorama_analyzer", None)
 
-        xMaxRight = rightPicture.shape[1]-1
-        yMaxRight = rightPicture.shape[0]-1
-        xMaxLeft = leftPicture.shape[1]-1
-        yMaxLeft = leftPicture.shape[0]-1
+        xMaxRight = rightPicture.shape[1] - 1
+        yMaxRight = rightPicture.shape[0] - 1
+        xMaxLeft = leftPicture.shape[1] - 1
+        yMaxLeft = leftPicture.shape[0] - 1
 
-        [xMaxRightOnLeft,yMaxRightOnLeft,temp] = np.round(np.dot(homographyMatrix,[xMaxRight,yMaxRight,1])).astype(int)
+        [xMaxRightOnLeft, yMaxRightOnLeft, temp] = np.round(np.dot(homographyMatrix, [xMaxRight, yMaxRight, 1])).astype(
+            int)
         xMaxRightOnLeft = int(xMaxRightOnLeft)
         yMaxRightOnLeft = int(yMaxRightOnLeft)
 
-        xMax = max(xMaxLeft,xMaxRightOnLeft)
-        yMax = max(yMaxLeft,yMaxRightOnLeft)
+        xMax = max(xMaxLeft, xMaxRightOnLeft)
+        yMax = max(yMaxLeft, yMaxRightOnLeft)
 
-        #finalPicture = np.matrix((yMax+1, xMax+1), [0,0,0])
-        finalPicture = np.zeros((yMax+1, xMax+1,3))
+        # finalPicture = np.matrix((yMax+1, xMax+1), [0,0,0])
+        finalPicture = np.zeros((yMax + 1, xMax + 1, 3))
 
-        for y in range (0,yMaxRight+1):
-            for x in range (0,xMaxRight+1):
-               [xNew,yNew,temp] = np.round(np.dot(homographyMatrix,[x,y,1])).astype(int) 
-               xNew = int(xNew)
-               yNew = int(yNew)
+        for y in range(0, yMaxRight + 1):
+            for x in range(0, xMaxRight + 1):
+                [xNew, yNew, temp] = np.round(np.dot(homographyMatrix, [x, y, 1])).astype(int)
+                xNew = int(xNew)
+                yNew = int(yNew)
 
-               if xNew <= xMax and yNew <= yMax and yNew >= 0 and xNew >= 0:
-                   finalPicture[yNew][xNew] = [255,255,255] - rightPicture[y][x]
-            
-        for y in range (0,yMaxLeft+1):
-            for x in range (0,xMaxLeft+1):
-                finalPicture[y][x] = [255,255,255] - leftPicture[y][x]
+                if xNew <= xMax and yNew <= yMax and yNew >= 0 and xNew >= 0:
+                    finalPicture[yNew][xNew] = [255, 255, 255] - rightPicture[y][x]
+
+        for y in range(0, yMaxLeft + 1):
+            for x in range(0, xMaxLeft + 1):
+                finalPicture[y][x] = [255, 255, 255] - leftPicture[y][x]
 
         if panoramaAnalyzer:
             panoramaAnalyzer.finalPicture = copy.deepcopy(finalPicture)
