@@ -19,10 +19,10 @@ class Panorama:
         panoramaAnalyzer = kwargs.get("panorama_analyzer", None)
 
         # On applique l'algorithme sur chaque images
-        keypointsLeft, _ = ImageProcessor.findKeypoints(imgLeftGreyscale, s, octave,
+        keypointsLeft, _ = ImageProcessor.findKeypoints(imgLeft, s, nb_octaves,
                                                         verbose=DEBUG,
                                                         pyramid_analyzer=None)
-        keypointsRight, _ = ImageProcessor.findKeypoints(imgRightGreyscale, s, octave,
+        keypointsRight, _ = ImageProcessor.findKeypoints(imgRight, s, nb_octaves,
                                                          verbose=DEBUG,
                                                          pyramid_analyzer=None)
 
@@ -102,19 +102,31 @@ class Panorama:
             ypn = friendlyPoints[i][0][0]
             matriceA.append([xn, yn, 1, 0, 0, 0, -xpn * xn, -xpn * yn, -xpn])
             matriceA.append([0, 0, 0, xn, yn, 1, -ypn * xn, -ypn * yn, -ypn])
-        return matriceA
+
+        ecartKPLeft = np.sqrt(((friendlyPoints[0][0][1] - friendlyPoints[1][0][1]) ** 2) + (
+            (friendlyPoints[0][0][0] - friendlyPoints[1][0][0]) ** 2))
+        ecartKPRight = np.sqrt(((friendlyPoints[0][1][1] - friendlyPoints[1][1][1]) ** 2) + (
+            (friendlyPoints[0][1][0] - friendlyPoints[1][1][0]) ** 2))
+        rapport = ecartKPLeft / ecartKPRight
+        return (matriceA, rapport)
 
     @staticmethod
-    def getTransformMatrix(A):
-        AT = np.transpose(A)
-        B = np.dot(AT, A)
-        (valPropres, vectPropres) = np.linalg.eig(B)
-        indexValMin = np.argmin(np.absolute(valPropres))
-        Hflatten = vectPropres[:, indexValMin]
-        # Hflatten = vectPropres[indexValMin]
-        HflattenNorm = Hflatten / Hflatten[len(Hflatten) - 1]
-        Hnorm = HflattenNorm.reshape(3, 3)
-        return Hnorm
+    def getTransformMatrix(A, rapport):
+        # AT = np.transpose(A)
+        # B = np.dot(AT, A)
+        # (valPropres, vectPropres) = np.linalg.eig(B)
+        # indexValMin = np.argmin(np.absolute(valPropres))
+        # Hflatten = vectPropres[:, indexValMin]
+        # HflattenNorm = Hflatten / Hflatten[len(Hflatten) - 1]
+        # Hnorm = HflattenNorm.reshape(3, 3)
+
+        U, s, V = np.linalg.svd(A, full_matrices=True)
+        Hflatten2 = V[len(V) - 1]
+        HflattenNorm2 = Hflatten2 / Hflatten2[len(Hflatten2) - 1]
+        Hnorm2 = HflattenNorm2.reshape(3, 3)
+        Hnorm2 = Hnorm2 * rapport
+
+        return Hnorm2
 
     @staticmethod
     def generatePanorama(leftPicture, rightPicture, homographyMatrix, **kwargs):
@@ -139,16 +151,16 @@ class Panorama:
 
         for y in range(0, yMaxRight + 1):
             for x in range(0, xMaxRight + 1):
-                [xNew, yNew, temp] = np.round(np.dot(homographyMatrix, [x, y, 1])).astype(int)
+                [xNew, yNew, temp] = np.round((np.dot(homographyMatrix, [x, y, 1]))).astype(int)
                 xNew = int(xNew)
                 yNew = int(yNew)
 
                 if xNew <= xMax and yNew <= yMax and yNew >= 0 and xNew >= 0:
-                    finalPicture[yNew][xNew] = [255, 255, 255] - rightPicture[y][x]
+                    finalPicture[yNew][xNew] = [256, 256, 256] - rightPicture[y][x]
 
         for y in range(0, yMaxLeft + 1):
             for x in range(0, xMaxLeft + 1):
-                finalPicture[y][x] = [255, 255, 255] - leftPicture[y][x]
+                finalPicture[y][x] = [256, 256, 256] - leftPicture[y][x]
 
         if panoramaAnalyzer:
             panoramaAnalyzer.finalPicture = copy.deepcopy(finalPicture)
