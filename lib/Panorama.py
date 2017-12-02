@@ -68,10 +68,8 @@ class Panorama:
                 Log.debug(str(round(float(i) / float(euclidean_dist.shape[0]) * 100, 2)) + " %", 1)
 
             for j in range(0, euclidean_dist.shape[1]):
-                if i == j:
-                    euclidean_dist[i][i] = 0.0
-                else:
-                    euclidean_dist[i][j] = _distanceEuclidean(points_image1[i], points_image2[j])
+
+                euclidean_dist[i][j] = _distanceEuclidean(points_image1[i], points_image2[j])
 
         return euclidean_dist
 
@@ -128,9 +126,47 @@ class Panorama:
         AT = np.transpose(A)
         B = np.dot(AT, A)
         (valPropres, vectPropres) = np.linalg.eig(B)
-        indexValMin = np.argmin(valPropres)
+        indexValMin = np.argmin(np.absolute(valPropres))
         Hflatten = vectPropres[:, indexValMin]
         # Hflatten = vectPropres[indexValMin]
         HflattenNorm = Hflatten / Hflatten[len(Hflatten) - 1]
         Hnorm = HflattenNorm.reshape(3, 3)
         return Hnorm
+
+    @staticmethod
+    def generatePanorama(leftPicture,rightPicture,homographyMatrix, **kwargs):
+        # Chargement de l'analyseur
+        panoramaAnalyzer = kwargs.get("panorama_analyzer", None)
+
+        xMaxRight = rightPicture.shape[1]-1
+        yMaxRight = rightPicture.shape[0]-1
+        xMaxLeft = leftPicture.shape[1]-1
+        yMaxLeft = leftPicture.shape[0]-1
+
+        [xMaxRightOnLeft,yMaxRightOnLeft,temp] = np.round(np.dot(homographyMatrix,[xMaxRight,yMaxRight,1])).astype(int)
+        xMaxRightOnLeft = int(xMaxRightOnLeft)
+        yMaxRightOnLeft = int(yMaxRightOnLeft)
+
+        xMax = max(xMaxLeft,xMaxRightOnLeft)
+        yMax = max(yMaxLeft,yMaxRightOnLeft)
+
+        #finalPicture = np.matrix((yMax+1, xMax+1), [0,0,0])
+        finalPicture = np.zeros((yMax+1, xMax+1,3))
+
+        for y in range (0,yMaxRight+1):
+            for x in range (0,xMaxRight+1):
+               [xNew,yNew,temp] = np.round(np.dot(homographyMatrix,[x,y,1])).astype(int) 
+               xNew = int(xNew)
+               yNew = int(yNew)
+
+               if xNew <= xMax and yNew <= yMax and yNew >= 0 and xNew >= 0:
+                   finalPicture[yNew][xNew] = [255,255,255] - rightPicture[y][x]
+            
+        for y in range (0,yMaxLeft+1):
+            for x in range (0,xMaxLeft+1):
+                finalPicture[y][x] = [255,255,255] - leftPicture[y][x]
+
+        if panoramaAnalyzer:
+            panoramaAnalyzer.finalPicture = copy.deepcopy(finalPicture)
+
+        return finalPicture

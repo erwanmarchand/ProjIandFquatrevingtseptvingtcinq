@@ -10,7 +10,13 @@ class Analyzer:
         self.outpath = outpath if outpath[-1] == "/" else outpath + "/"
 
     @staticmethod
-    def showKeyPoints(image, keypoints):
+    def showKeyPoints(image, keypoints, **kwargs):
+        colors = kwargs.get("colors", None)
+        if colors:
+            for k, keypoint in enumerate(keypoints):
+                image = ImageManager.showKeyPoint(image, keypoint,color=colors[k%4])
+
+            return image
         for k, keypoint in enumerate(keypoints):
             image = ImageManager.showKeyPoint(image, keypoint)
 

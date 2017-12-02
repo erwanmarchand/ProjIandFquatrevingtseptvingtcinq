@@ -18,7 +18,11 @@ class PanoramaAnalyzer(Analyzer):
         self.originalRightPicture = None
         self.keyPointsRightPicture = []
 
+        self.finalPicture = None
+
         self.friendlyCouples = []
+
+        self.colors = [[0, 255, 255],[0, 255, 0],[255, 0, 255],[255, 255, 0]]
 
         matplotlib.rcParams.update({'font.size': 5})
 
@@ -28,7 +32,8 @@ class PanoramaAnalyzer(Analyzer):
 
     def getFunctions(self):
         return [
-            self.saveFriendlyCouples
+            self.saveFriendlyCouples,
+            self.saveFinalPicture
         ]
 
     def saveFriendlyCouples(self, fi):
@@ -42,7 +47,7 @@ class PanoramaAnalyzer(Analyzer):
             candidatesLeft.append(self.friendlyCouples[i][0])
             candidatesRight.append(self.friendlyCouples[i][1])
 
-        img = self.showKeyPoints(copy.deepcopy(self.originalLeftPicture), candidatesLeft)
+        img = self.showKeyPoints(copy.deepcopy(self.originalLeftPicture), candidatesLeft, colors=self.colors)
         plt.imshow(img)
         plt.title("Keypoints - " + str(len(self.friendlyCouples)))
 
@@ -53,7 +58,7 @@ class PanoramaAnalyzer(Analyzer):
 
         plt.figure(fi + 2)
 
-        img = self.showKeyPoints(copy.deepcopy(self.originalRightPicture), candidatesRight)
+        img = self.showKeyPoints(copy.deepcopy(self.originalRightPicture), candidatesRight, colors=self.colors)
         plt.imshow(img)
         plt.title("Keypoints - " + str(len(self.friendlyCouples)))
 
@@ -65,3 +70,20 @@ class PanoramaAnalyzer(Analyzer):
         Log.debug("Fin génération images")
 
         return fi + 2
+
+    def saveFinalPicture(self, fi):
+        Log.debug("Génération de l'image finale")
+        plt.figure(fi + 1)
+
+        img = self.finalPicture
+        plt.imshow(img)
+        plt.title("Panorama generated")
+
+        # Affichage des points par octaves
+        self.saveToFile("Panorama_generated")
+        plt.clf()
+        plt.cla()
+
+        Log.debug("Fin génération image finale")
+
+        return fi + 1

@@ -70,7 +70,11 @@ class ImageManager:
     @staticmethod
     def showKeyPoint(image, keypoint, **kwargs):
         rows, cols = ImageManager.getDimensions(image)
-        point_color = [int(keypoint[2] * 1000) % 256, int(keypoint[2] * 333) % 256, int(keypoint[2] * 666) % 256]
+        color = kwargs.get("color", None)
+        if color :
+            point_color = color
+        else :
+            point_color = [int(keypoint[2] * 1000) % 256, int(keypoint[2] * 333) % 256, int(keypoint[2] * 666) % 256]
 
         # On détermine si l'argument "keypoint" est un descripteur complet ou juste un point clé
         if len(keypoint) <= 4:
