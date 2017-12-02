@@ -18,23 +18,18 @@ DEBUG = True
 Log_file.DEBUG_ACTIVATED = DEBUG
 Log.debug("Démarrage...")
 Log.debug("Chargement des images")
-imgGaucheWithColor = ImageManager.loadMatrix(IMAGES_PATH + NAME_IMAGE_GAUCHE)
-imgDroiteWithColor = ImageManager.loadMatrix(IMAGES_PATH + NAME_IMAGE_DROITE)
-Log.debug("Images chargées. Redimensionnement des images")
-imgGaucheWithColor = ImageManager.getOctave(imgGaucheWithColor, -1)
-imgDroiteWithColor = ImageManager.getOctave(imgDroiteWithColor, -1)
+image_gauche = ImageManager.loadMatrix(IMAGES_PATH + NAME_IMAGE_GAUCHE)
+image_droite = ImageManager.loadMatrix(IMAGES_PATH + NAME_IMAGE_DROITE)
 
 # On charge un analyseur afin de récolter des données sur notre script
 if ANALYSIS:
     Log.debug("Chargement de l'analyseur")
-    analyzer = PanoramaAnalyzer("out/")
-    analyzer.originalLeftPicture = imgGaucheWithColor
-    analyzer.originalRightPicture = imgDroiteWithColor
+    analyzer = PanoramaAnalyzer("out_panorama/")
+    analyzer.originalLeftPicture = image_gauche
+    analyzer.originalRightPicture = image_droite
 else:
     analyzer = None
 
 # On créer le panorama
-
-minValues = Panorama.getFriendlyCouples(imgGaucheWithColor, imgDroiteWithColor, 4, verbose=DEBUG, panorama_analyzer=analyzer)
-
+minValues = Panorama.getFriendlyCouples(image_gauche, image_droite, 4, verbose=DEBUG, panorama_analyzer=analyzer)
 analyzer.analyze()

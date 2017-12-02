@@ -86,4 +86,4 @@ class ImageProcessor:
             Log.debug("Enregistrement des descripteurs dans l'analyseur")
             pyramid_analyzer.descriptors = descripteurs
 
-        return descripteurs, pyramid_analyzer
+        return descripteurs

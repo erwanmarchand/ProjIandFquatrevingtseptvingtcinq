@@ -19,10 +19,10 @@ class Panorama:
         panoramaAnalyzer = kwargs.get("panorama_analyzer", None)
 
         # On applique l'algorithme sur chaque images
-        keypointsLeft, _ = ImageProcessor.findKeypoints(imgLeft, s, nb_octaves,
+        keypointsLeft = ImageProcessor.findKeypoints(imgLeft, s, nb_octaves,
                                                         verbose=DEBUG,
                                                         pyramid_analyzer=None)
-        keypointsRight, _ = ImageProcessor.findKeypoints(imgRight, s, nb_octaves,
+        keypointsRight = ImageProcessor.findKeypoints(imgRight, s, nb_octaves,
                                                          verbose=DEBUG,
                                                          pyramid_analyzer=None)
 
