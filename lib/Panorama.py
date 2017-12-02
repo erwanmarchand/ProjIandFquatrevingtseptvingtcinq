@@ -30,7 +30,7 @@ class Panorama:
             panoramaAnalyzer.keyPointsLeftPicture = copy.deepcopy(keypointsLeft)
             panoramaAnalyzer.keyPointsRightPicture = copy.deepcopy(keypointsRight)
 
-        return (keypointsLeft, keypointsRight)
+        return keypointsLeft, keypointsRight
 
     @staticmethod
     def distanceInterPoints(points_image1, points_image2, **kwargs):

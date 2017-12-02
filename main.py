@@ -7,7 +7,7 @@ import lib.debug.Log as Log_file
 import numpy as np
 
 IMAGES_PATH = "images/"
-NAME_PICTURE = 'lignes.png'
+NAME_PICTURE = 'lena.png'
 
 ANALYSIS = True
 DEBUG = True
