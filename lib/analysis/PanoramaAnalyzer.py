@@ -19,6 +19,7 @@ class PanoramaAnalyzer(Analyzer):
         self.keyPointsRightPicture = []
 
         self.finalPicture = None
+        self.finalPictureCV2 = None
 
         self.friendlyCouples = []
 
