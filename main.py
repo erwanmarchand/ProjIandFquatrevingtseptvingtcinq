@@ -23,6 +23,7 @@ image = ImageManager.loadMatrix(IMAGES_PATH + NAME_PICTURE)
 
 # On applique l'algorithme
 descriptors, analyzer = ImageProcessor.findKeypoints(image, S, NB_OCTAVE,
-                                                     analysis=ANALYSIS)
+                                                     analysis=ANALYSIS,
+                                                     analyzer_outdir="out")
 
 analyzer.analyze()

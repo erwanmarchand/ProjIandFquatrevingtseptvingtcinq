@@ -84,7 +84,7 @@ class ImageManager:
                 kp3 = None
 
             if kp3 is not None:
-                radius = (keypoint[2] ** 1.5) * 4 * min(cols, rows) / 1024
+                radius = (keypoint[2] ** 1.5) * 10 * min(cols, rows) / 1024
                 image = cv2.circle(image, (keypoint[1], keypoint[0]), int(radius), point_color, 2)
 
                 # On dessine la fleche représentant l'orientation du point clé
