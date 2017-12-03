@@ -73,11 +73,6 @@ class ExtremaDetector:
         # Execution
         height, width = ImageManager.getDimensions(DoGs[0])
 
-        # Génération des DoGs normalisés (valeur en 0 et 1)
-        DoGsNormalized = []
-        for k in range(len(DoGs)):
-            DoGsNormalized.append(ImageManager.normalizeImage(DoGs[k]))
-
         def _filtrerPointsContraste():
             Log.debug("Demarrage du filtrage par contraste", 1)
             realPoints = []
@@ -87,7 +82,7 @@ class ExtremaDetector:
                 Log.debug("Traitement du sigma " + str(i_sigma) + " : " + str(sigmas[i_sigma]), 2)
                 for row in range(1, height - 1):
                     for col in range(1, width - 1):
-                        if abs(DoGsNormalized[i_sigma][row, col]) >= seuil_contraste:
+                        if abs(DoGs[i_sigma][row, col]) >= seuil_contraste:
                             realPoints.append((row, col, i_sigma))
 
             return realPoints
@@ -96,7 +91,10 @@ class ExtremaDetector:
             Log.debug("Demarrage de la détection des extremums", 1)
             extremums = []
 
-            for c in candidats:
+            nb_candidats = len(candidats)
+
+            for nb, c in enumerate(candidats):
+                Utils.updateProgress(float(nb)/nb_candidats)
                 (row, col, i_sigma) = c
 
                 group_max, group_min = -np.inf, np.inf
@@ -108,6 +106,8 @@ class ExtremaDetector:
                 # Si le point est un extremum de la region, c'est un point candidat
                 if DoGs[i_sigma][row, col] in [group_max, group_min]:
                     extremums.append(c)
+
+            print("")
 
             return extremums
 
@@ -121,8 +121,8 @@ class ExtremaDetector:
             Fy = np.matrix('1 2 1;0 0 0;-1 -2 -1')
 
             for k in range(1, len(DoGs) - 1):
-                Dx[k] = Filter.convolve2D(DoGsNormalized[k], Fx)
-                Dy[k] = Filter.convolve2D(DoGsNormalized[k], Fy)
+                Dx[k] = Filter.convolve2D(DoGs[k], Fx)
+                Dy[k] = Filter.convolve2D(DoGs[k], Fy)
 
             for k in range(1, len(DoGs) - 1):
                 Dxx[k] = Filter.convolve2D(Dx[k], Fx)

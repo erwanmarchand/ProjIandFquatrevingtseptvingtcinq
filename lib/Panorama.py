@@ -18,8 +18,8 @@ class Panorama:
         # Chargement de l'analyseur
         panoramaAnalyzer = kwargs.get("panorama_analyzer", None)
 
-        pyramidAnalyzerLeft = PyramidAnalyzer("out_panorama_left/") if panoramaAnalyzer else None
-        pyramidAnalyzerRight = PyramidAnalyzer("out_panorama_right/") if panoramaAnalyzer else None
+        pyramidAnalyzerLeft = PyramidAnalyzer("out_panorama_left/") if kwargs.get("analyse_each_image", False) else None
+        pyramidAnalyzerRight = PyramidAnalyzer("out_panorama_right/") if kwargs.get("analyse_each_image", False) else None
 
 
         # On applique l'algorithme sur chaque images
@@ -30,7 +30,7 @@ class Panorama:
                                                          verbose=DEBUG,
                                                          pyramid_analyzer=pyramidAnalyzerRight)
 
-        if panoramaAnalyzer and kwargs.get("analyse_each_image", False):
+        if kwargs.get("analyse_each_image", False):
             pyramidAnalyzerLeft.analyze()
             pyramidAnalyzerRight.analyze()
 

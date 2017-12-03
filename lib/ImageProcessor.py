@@ -19,7 +19,10 @@ class ImageProcessor:
         Log.debug("Conversion de l'image en niveaux de gris")
         image_greyscale_doubled = ImageManager.getGreyscale(image_doubled)
 
-        return image_doubled, image_greyscale, image_greyscale_doubled
+        return image / 255., \
+               image_doubled / 255., \
+               image_greyscale / 255., \
+               image_greyscale_doubled / 255.
 
     @staticmethod
     def checkNbOctave(image_travail, nb_octaves):
@@ -36,7 +39,7 @@ class ImageProcessor:
         if image_original is None:
             raise Exception("Erreur : Aucune image envoyee")
 
-        image_doubled, image_greyscale, image_greyscale_doubled = ImageProcessor.prepareImage(image_original)
+        image_original, image_doubled, image_greyscale, image_greyscale_doubled = ImageProcessor.prepareImage(image_original)
         nb_octaves = ImageProcessor.checkNbOctave(image_doubled, nb_octaves)
 
         Log.debug("Construction des pyramides des gaussiennes et des DoGs")
@@ -52,7 +55,7 @@ class ImageProcessor:
                 DoGs[i],
                 octaves[i],
                 sigmas,
-                kwargs.get("minimum_contrast", 0.50),
+                kwargs.get("minimum_contrast", 0.03),
                 kwargs.get("r_courb_principal", 7),
                 1 / (2 ** i),
                 i,
