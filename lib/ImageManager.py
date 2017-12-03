@@ -23,10 +23,8 @@ class ImageManager:
     @staticmethod
     def normalizeImage(image):
         image_max = max(abs(np.max(image)), abs(np.min(image)))
-        if image_max > 1:  # On vérifie que l'image n'est pas déja normalisée
-            return image / image_max
-        else:
-            return image
+
+        return image / image_max
 
     @staticmethod
     def divideSizeBy2(image):
@@ -104,10 +102,6 @@ class ImageManager:
             image = cv2.circle(image, (int(keypoint[1]), int(keypoint[0])), int(radius), point_color, 2)
 
         return image
-
-    @staticmethod
-    def makeDifference(img1, img2):
-        return img1 - img2
 
     @staticmethod
     def showImage(image, **kwargs):

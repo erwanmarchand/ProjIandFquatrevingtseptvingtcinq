@@ -6,8 +6,8 @@ from lib.debug.Log import *
 import lib.debug.Log as Log_file
 import numpy as np
 
-IMAGES_PATH = "tests/images/"
-NAME_PICTURE = 'line1.png'
+IMAGES_PATH = "images/"
+NAME_PICTURE = 'lena.jpg'
 
 ANALYSIS = True
 DEBUG = True
@@ -25,7 +25,7 @@ image = ImageManager.loadMatrix(IMAGES_PATH + NAME_PICTURE)
 analyzer = PyramidAnalyzer("out/")
 descriptors = ImageProcessor.findKeypoints(image, S, NB_OCTAVE,
                                            pyramid_analyzer=analyzer,
-                                           minimum_contrast=0.10,
+                                           minimum_contrast=0.20,
                                            r_courb_principal=10)
 
 analyzer.analyze()

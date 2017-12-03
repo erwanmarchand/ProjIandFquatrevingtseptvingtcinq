@@ -17,13 +17,10 @@ class ExtremaDetector:
         :param image:       L'image originale
         :param s:           Le facteur s
         :param nb_octave:   Le nombre d'octave à générer
-        :return:            (DoGs, pyramide des octaves, liste des sigmas)
+        :return:            (pyramide des DoGs, pyramide des octaves, liste des sigmas)
         """
-        if image is None:
-            raise Exception("Erreur : Aucune image envoyee")
 
         nb_element = s + 3
-        verbose = kwargs.get('verbose', False)
 
         # Construction de la pyramide de gaussiennes
         Log.debug("Génération de la pyramide de Gaussiennes", 1)
@@ -42,13 +39,13 @@ class ExtremaDetector:
 
         # Generation de la pyramide des différences
         Log.debug("Génération de la pyramide des différences de Gaussiennes", 1)
-        doG = [[] for k in range(nb_octave)]
+        DoGs = [[] for k in range(nb_octave)]
 
         for octave in range(nb_octave):
             for k in range(nb_element - 1):
-                doG[octave].append(ImageManager.makeDifference(pyramid[octave][k + 1], pyramid[octave][k]))
+                DoGs[octave].append(pyramid[octave][k + 1] - pyramid[octave][k])
 
-        return doG, pyramid, sigmas
+        return DoGs, pyramid, sigmas
 
     @staticmethod
     def detectionPointsCles(DoGs, octaves, sigmas, seuil_contraste, r_courb_principale, resolution_octave, octave_nb,
@@ -89,7 +86,7 @@ class ExtremaDetector:
                 Log.debug("Traitement du sigma " + str(i_sigma) + " : " + str(sigmas[i_sigma]), 2)
                 for row in range(1, height - 1):
                     for col in range(1, width - 1):
-                        if abs(DoGsNormalized[i_sigma][row, col]) > seuil_contraste:
+                        if abs(DoGsNormalized[i_sigma][row, col]) >= seuil_contraste:
                             realPoints.append((row, col, i_sigma))
 
             return realPoints
@@ -100,16 +97,15 @@ class ExtremaDetector:
 
             for c in candidats:
                 (row, col, i_sigma) = c
-                neighbours = []
 
-                neighbours += [DoGs[i_sigma - 1][row - 1:row + 2, col - 1:col + 2]]
-                neighbours += [DoGs[i_sigma][row - 1:row + 2, col - 1:col + 2]]
-                neighbours += [DoGs[i_sigma + 1][row - 1:row + 2, col - 1:col + 2]]
+                group_max, group_min = -np.inf, np.inf
 
-                neighbours = np.array(neighbours).flat
+                for o in range(-1, 2):
+                    elt = DoGs[i_sigma + o][(row - 1):(row + 1) + 1, (col - 1):(col + 1) + 1]
+                    group_max, group_min = max(group_max, elt.max()), min(group_min, elt.min())
 
-                # Si le point est effectivement le maximum de la region, c'est un point candidat
-                if DoGs[i_sigma][row, col] == np.max(neighbours) or DoGs[i_sigma][row, col] == np.min(neighbours):
+                # Si le point est un extremum de la region, c'est un point candidat
+                if DoGs[i_sigma][row, col] in [group_max, group_min]:
                     extremums.append(c)
 
             return extremums
@@ -120,8 +116,8 @@ class ExtremaDetector:
 
             Dx, Dy, Dxx, Dyy, Dxy = {}, {}, {}, {}, {}
 
-            Fy = np.matrix('-1 0 1;-2 0 2;-1 0 1')
-            Fx = np.matrix('1 2 1;0 0 0;-1 -2 -1')
+            Fx = np.matrix('-1 0 1;-2 0 2;-1 0 1')
+            Fy = np.matrix('1 2 1;0 0 0;-1 -2 -1')
 
             for k in range(1, len(DoGs) - 1):
                 Dx[k] = Filter.convolve2D(DoGsNormalized[k], Fx)
@@ -220,8 +216,6 @@ class ExtremaDetector:
         candidats = _detectionExtremums(candidats)
         if analyseur:
             elements["kp_after_extremum_detection"] = copy.deepcopy(candidats)
-
-        ## BONUS EVENTUEL ICI
 
         # Filtrage des points sur les arêtes
         Log.debug(str(len(candidats)) + " points", 1)

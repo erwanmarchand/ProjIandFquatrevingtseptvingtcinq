@@ -30,6 +30,9 @@ class ImageProcessor:
 
     @staticmethod
     def findKeypoints(image_original, s, nb_octaves, **kwargs):
+        if image_original is None:
+            raise Exception("Erreur : Aucune image envoyee")
+
         image_doubled, image_greyscale = ImageProcessor.prepareImage(image_original, **kwargs)
         nb_octaves = ImageProcessor.checkNbOctave(image_doubled, nb_octaves)
 
@@ -39,6 +42,7 @@ class ImageProcessor:
 
         #  On applique une détéction de points clés sur chaque octave
         for i in range(len(octaves)):
+            Log.debug("BEGIN -------------------------------- " + str(i + 1))
             Log.debug("Debut de l'analyse de l'octave " + str(i + 1))
 
             points = ExtremaDetector.detectionPointsCles(
@@ -61,7 +65,7 @@ class ImageProcessor:
             # On ajoute les nouveaux points clés à la liste
             points_cles = Utils.concatenateKeyPoints(points_cles, octave_points)
 
-            Log.debug("-------------------------------- " + str(i + 1))
+            Log.debug("END -------------------------------- " + str(i + 1))
 
         Log.debug("Remplacement des sigmas par leur valeur", 1)
         points_cles = Utils.adaptSigmas(points_cles, sigmas)
