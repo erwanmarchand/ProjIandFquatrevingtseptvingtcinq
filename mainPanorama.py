@@ -8,9 +8,8 @@ import lib.debug.Log as Log_file
 import numpy as np
 
 IMAGES_PATH = "images/"
-NAME_IMAGE_GAUCHE = 'lena2left.jpg'
-NAME_IMAGE_GAUCHE = 'lena2left.jpg'
-NAME_IMAGE_DROITE = 'lena2right.jpg'
+#NAME_IMAGE_GAUCHE = 'lena2left.jpg'
+#NAME_IMAGE_DROITE = 'lena2right.jpg'
 NAME_IMAGE_GAUCHE = 'gauche.jpg'
 NAME_IMAGE_DROITE = 'droite.jpg'
 
@@ -36,8 +35,14 @@ else:
 
 
 # On crée le panorama
-minValues = Panorama.getFriendlyCouples(image_gauche, image_droite, 4,
+minValues = Panorama.getFriendlyCouples(image_gauche, image_droite, 10,
                                         panorama_analyzer=analyzer,
                                         analyse_each_image=ANALYSE_EACH_IMAGE)
+
+A = Panorama.getMatriceA(minValues)
+
+Hnorm = Panorama.getTransformMatrix(A)
+
+finalPicture = Panorama.generatePanorama(image_gauche,image_droite,Hnorm, panorama_analyzer=analyzer)
 
 analyzer.analyze()

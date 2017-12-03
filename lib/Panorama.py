@@ -85,12 +85,24 @@ class Panorama:
 
         maxValue = matrixDistances.max()
 
-        for index in range(0, n):
+        index = 0
+        while index < n:
             minValue = matrixDistances.min()
             minPosition = np.where(matrixDistances == minValue)
             iMin, jMin = minPosition[0][0], minPosition[1][0]
 
-            friendlyPoints.append((SIFTPointsLeft[iMin], SIFTPointsRight[jMin]))
+            yLeftKP = SIFTPointsLeft[iMin][0]
+            alreadyInFriends = False
+
+            for friend in friendlyPoints:
+                if friend[0][0] == yLeftKP :
+                    alreadyInFriends = True
+
+
+            if not alreadyInFriends:
+                friendlyPoints.append((SIFTPointsLeft[iMin], SIFTPointsRight[jMin]))
+                index = index + 1
+
             matrixDistances[iMin][jMin] = maxValue
 
         if panoramaAnalyzer:
@@ -118,6 +130,7 @@ class Panorama:
         ecartKPRight = np.sqrt(((friendlyPoints[0][1][1] - friendlyPoints[1][1][1]) ** 2) + (
             (friendlyPoints[0][1][0] - friendlyPoints[1][1][0]) ** 2))
         rapport = ecartKPLeft / ecartKPRight
+
         return matriceA
 
     @staticmethod
@@ -156,7 +169,6 @@ class Panorama:
         xMax = max(xMaxLeft, xMaxRightOnLeft)
         yMax = max(yMaxLeft, yMaxRightOnLeft)
 
-        # finalPicture = np.matrix((yMax+1, xMax+1), [0,0,0])
         finalPicture = np.zeros((yMax + 1, xMax + 1, 3))
 
         for y in range(0, yMaxRight + 1):
