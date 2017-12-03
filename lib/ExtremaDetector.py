@@ -249,12 +249,16 @@ class ExtremaDetector:
         nb_point_cles = len(points_cles)
 
         LIMIT = int(8 * np.sqrt(2) + 8)
+        BORDER_LIMIT = 9
 
         for n, (row, col, sigma, a) in enumerate(points_cles):
             Utils.updateProgress(float(n) / nb_point_cles)
 
             # On élimine les points clés trop pret du bord
-            if not (row < 9 or col < 9 or height - row < 9 or width - col < 9):
+            if not (row < BORDER_LIMIT
+                    or col < BORDER_LIMIT
+                    or height - row < BORDER_LIMIT
+                    or width - col < BORDER_LIMIT):
                 rowMax, colMax, rowMin, colMin = min(height - 1, row + LIMIT), \
                                                  min(width - 1, col + LIMIT), \
                                                  max(0, row - LIMIT), \
@@ -327,7 +331,7 @@ class ExtremaDetector:
                 #  On renormalise
                 H_final = H_final / float(np.max(H_final))
 
-                descripteur = np.concatenate((np.array([realRow, realCol]), H_final))
+                descripteur = np.concatenate((np.array([int(realRow), int(realCol)]), H_final))
                 descripteurs.append(descripteur)
 
         print("")  # Debuff pour la barre de chargement

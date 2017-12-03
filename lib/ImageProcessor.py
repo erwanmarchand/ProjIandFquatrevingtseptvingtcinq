@@ -14,9 +14,12 @@ class ImageProcessor:
         image_doubled = ImageManager.getOctave(image, -1)
 
         Log.debug("Conversion de l'image en niveaux de gris")
-        image_greyscale = ImageManager.getGreyscale(image_doubled)
+        image_greyscale = ImageManager.getGreyscale(image)
 
-        return image_doubled, image_greyscale
+        Log.debug("Conversion de l'image en niveaux de gris")
+        image_greyscale_doubled = ImageManager.getGreyscale(image_doubled)
+
+        return image_doubled, image_greyscale, image_greyscale_doubled
 
     @staticmethod
     def checkNbOctave(image_travail, nb_octaves):
@@ -33,11 +36,11 @@ class ImageProcessor:
         if image_original is None:
             raise Exception("Erreur : Aucune image envoyee")
 
-        image_doubled, image_greyscale = ImageProcessor.prepareImage(image_original)
+        image_doubled, image_greyscale, image_greyscale_doubled = ImageProcessor.prepareImage(image_original)
         nb_octaves = ImageProcessor.checkNbOctave(image_doubled, nb_octaves)
 
         Log.debug("Construction des pyramides des gaussiennes et des DoGs")
-        DoGs, octaves, sigmas = ExtremaDetector.differenceDeGaussienne(image_greyscale, s, nb_octaves)
+        DoGs, octaves, sigmas = ExtremaDetector.differenceDeGaussienne(image_greyscale_doubled, s, nb_octaves)
         points_cles = []
 
         #  On applique une détéction de points clés sur chaque octave
@@ -49,8 +52,8 @@ class ImageProcessor:
                 DoGs[i],
                 octaves[i],
                 sigmas,
-                kwargs.get("minimum_contrast", 0.20),
-                kwargs.get("r_courb_principal", 10),
+                kwargs.get("minimum_contrast", 0.50),
+                kwargs.get("r_courb_principal", 7),
                 1 / (2 ** i),
                 i,
                 **kwargs
@@ -78,7 +81,7 @@ class ImageProcessor:
         # On s'occupe d'un eventuel analyseur
         ImageProcessor.fillAnalyzer(image_original,
                                     image_doubled,
-                                    image_greyscale,
+                                    image_greyscale_doubled,
                                     DoGs,
                                     octaves,
                                     sigmas,
@@ -89,7 +92,7 @@ class ImageProcessor:
         return descriptors
 
     @staticmethod
-    def fillAnalyzer(image_original, image_doubled, image_greyscale, DoGs, octaves, sigmas, key_points, descriptors,
+    def fillAnalyzer(image_original, image_doubled, image_greyscale_doubled, DoGs, octaves, sigmas, key_points, descriptors,
                      **kwargs):
         pyramid_analyzer = kwargs.get("pyramid_analyzer", None)
 
@@ -97,7 +100,7 @@ class ImageProcessor:
             Log.debug("Remplissage de l'analyseur")
             pyramid_analyzer.originalPicture = copy.deepcopy(image_original)
             pyramid_analyzer.doubledPicture = copy.deepcopy(image_doubled)
-            pyramid_analyzer.greyscaleDoubledPicture = copy.deepcopy(image_greyscale)
+            pyramid_analyzer.greyscaleDoubledPicture = copy.deepcopy(image_greyscale_doubled)
 
             pyramid_analyzer.sigmas = copy.deepcopy(sigmas)
 
