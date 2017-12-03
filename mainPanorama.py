@@ -30,6 +30,6 @@ if ANALYSIS:
 else:
     analyzer = None
 
-# On créer le panorama
-minValues = Panorama.getFriendlyCouples(image_gauche, image_droite, 4, verbose=DEBUG, panorama_analyzer=analyzer)
+# On crée le panorama
+minValues = Panorama.getFriendlyCouples(image_gauche, image_droite, 4, panorama_analyzer=analyzer)
 analyzer.analyze()

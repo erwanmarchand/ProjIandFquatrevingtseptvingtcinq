@@ -18,13 +18,21 @@ class Panorama:
         # Chargement de l'analyseur
         panoramaAnalyzer = kwargs.get("panorama_analyzer", None)
 
+        pyramidAnalyzerLeft = PyramidAnalyzer("out_panorama_left/") if panoramaAnalyzer else None
+        pyramidAnalyzerRight = PyramidAnalyzer("out_panorama_right/") if panoramaAnalyzer else None
+
+
         # On applique l'algorithme sur chaque images
         keypointsLeft = ImageProcessor.findKeypoints(imgLeft, s, nb_octaves,
                                                         verbose=DEBUG,
-                                                        pyramid_analyzer=None)
+                                                        pyramid_analyzer=pyramidAnalyzerLeft)
         keypointsRight = ImageProcessor.findKeypoints(imgRight, s, nb_octaves,
                                                          verbose=DEBUG,
-                                                         pyramid_analyzer=None)
+                                                         pyramid_analyzer=pyramidAnalyzerRight)
+
+        if panoramaAnalyzer:
+            pyramidAnalyzerLeft.analyze()
+            pyramidAnalyzerRight.analyze()
 
         if panoramaAnalyzer:
             panoramaAnalyzer.keyPointsLeftPicture = copy.deepcopy(keypointsLeft)
@@ -48,9 +56,8 @@ class Panorama:
         euclidean_dist = np.zeros((nbr_key_points_img_left, nbr_key_points_img_right))
 
         for i in range(0, euclidean_dist.shape[0]):
-            if i % int(euclidean_dist.shape[0] / 20) == 0:
-                Log.debug(str(round(float(i) / float(euclidean_dist.shape[0]) * 100, 2)) + " %", 1)
-
+            Utils.updateProgress(round(float(i) / float(euclidean_dist.shape[0])))
+            print("")
             for j in range(0, euclidean_dist.shape[1]):
                 euclidean_dist[i][j] = _distanceEuclidean(points_image1[i], points_image2[j])
 
