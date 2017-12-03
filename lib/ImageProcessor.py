@@ -9,7 +9,7 @@ class ImageProcessor:
         pass
 
     @staticmethod
-    def prepareImage(image, **kwargs):
+    def prepareImage(image):
         Log.debug("Doublement de la taille de l'image")
         image_doubled = ImageManager.getOctave(image, -1)
 
@@ -33,7 +33,7 @@ class ImageProcessor:
         if image_original is None:
             raise Exception("Erreur : Aucune image envoyee")
 
-        image_doubled, image_greyscale = ImageProcessor.prepareImage(image_original, **kwargs)
+        image_doubled, image_greyscale = ImageProcessor.prepareImage(image_original)
         nb_octaves = ImageProcessor.checkNbOctave(image_doubled, nb_octaves)
 
         Log.debug("Construction des pyramides des gaussiennes et des DoGs")
@@ -76,37 +76,35 @@ class ImageProcessor:
         descriptors = ExtremaDetector.descriptionPointsCles(image_greyscale, points_cles)
 
         # On s'occupe d'un eventuel analyseur
-        if kwargs.get("pyramid_analyzer", None):
-            ImageProcessor.fillAnalyzer(image_original,
-                                        image_doubled,
-                                        image_greyscale,
-                                        DoGs,
-                                        octaves,
-                                        sigmas,
-                                        points_cles,
-                                        descriptors)
+        ImageProcessor.fillAnalyzer(image_original,
+                                    image_doubled,
+                                    image_greyscale,
+                                    DoGs,
+                                    octaves,
+                                    sigmas,
+                                    points_cles,
+                                    descriptors,
+                                    **kwargs)
 
         return descriptors
 
     @staticmethod
     def fillAnalyzer(image_original, image_doubled, image_greyscale, DoGs, octaves, sigmas, key_points, descriptors,
                      **kwargs):
-        Log.debug("Chargement de l'analyseur")
         pyramid_analyzer = kwargs.get("pyramid_analyzer", None)
 
-        if pyramid_analyzer:
+        if pyramid_analyzer is not None:
             Log.debug("Remplissage de l'analyseur")
-            pyramid_analyzer = PyramidAnalyzer(kwargs.get("analyzer_outdir", "out/"))
-            pyramid_analyzer.originalPicture = image_original
-            pyramid_analyzer.doubledPicture = image_doubled
-            pyramid_analyzer.greyscaleDoubledPicture = image_greyscale
+            pyramid_analyzer.originalPicture = copy.deepcopy(image_original)
+            pyramid_analyzer.doubledPicture = copy.deepcopy(image_doubled)
+            pyramid_analyzer.greyscaleDoubledPicture = copy.deepcopy(image_greyscale)
 
-            pyramid_analyzer.sigmas = sigmas
+            pyramid_analyzer.sigmas = copy.deepcopy(sigmas)
 
-            pyramid_analyzer.dogPyramid = DoGs
-            pyramid_analyzer.imagePyramid = octaves
+            pyramid_analyzer.dogPyramid = copy.deepcopy(DoGs)
+            pyramid_analyzer.imagePyramid = copy.deepcopy(octaves)
 
-            pyramid_analyzer.key_points = key_points
+            pyramid_analyzer.key_points = copy.deepcopy(key_points)
 
             Log.debug("Enregistrement des descripteurs dans l'analyseur")
-            pyramid_analyzer.descriptors = descriptors
+            pyramid_analyzer.descriptors = copy.deepcopy(descriptors)

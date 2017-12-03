@@ -248,7 +248,7 @@ class ExtremaDetector:
         H_angle = np.linspace(0, 2 * np.pi, 8 + 1)
         nb_point_cles = len(points_cles)
 
-        LIMIT = int(8 * np.sqrt(2) + 10)
+        LIMIT = int(8 * np.sqrt(2) + 8)
 
         for n, (row, col, sigma, a) in enumerate(points_cles):
             Utils.updateProgress(float(n) / nb_point_cles)
