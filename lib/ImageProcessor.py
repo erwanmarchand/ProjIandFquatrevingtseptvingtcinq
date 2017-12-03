@@ -16,9 +16,10 @@ class ImageProcessor:
         Log.debug("Conversion de l'image en niveaux de gris")
         image_greyscale = ImageManager.getGreyscale(image)
 
-        Log.debug("Conversion de l'image en niveaux de gris")
+        Log.debug("Doublement de la taille de l'image en niveaux de gris")
         image_greyscale_doubled = ImageManager.getGreyscale(image_doubled)
 
+        # On renvoi les images dans l'interval [0;1]
         return image / 255., \
                image_doubled / 255., \
                image_greyscale / 255., \
