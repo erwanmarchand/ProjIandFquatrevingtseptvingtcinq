@@ -6,6 +6,9 @@ from lib.debug.Log import *
 import numpy as np
 import copy
 
+import imutils
+import cv2
+
 
 class Panorama:
     def __init__(self):
@@ -30,7 +33,7 @@ class Panorama:
             panoramaAnalyzer.keyPointsLeftPicture = copy.deepcopy(keypointsLeft)
             panoramaAnalyzer.keyPointsRightPicture = copy.deepcopy(keypointsRight)
 
-        return keypointsLeft, keypointsRight
+        return (keypointsLeft, keypointsRight)
 
     @staticmethod
     def distanceInterPoints(points_image1, points_image2, **kwargs):
@@ -108,10 +111,10 @@ class Panorama:
         ecartKPRight = np.sqrt(((friendlyPoints[0][1][1] - friendlyPoints[1][1][1]) ** 2) + (
             (friendlyPoints[0][1][0] - friendlyPoints[1][1][0]) ** 2))
         rapport = ecartKPLeft / ecartKPRight
-        return (matriceA, rapport)
+        return matriceA
 
     @staticmethod
-    def getTransformMatrix(A, rapport):
+    def getTransformMatrix(A):
         # AT = np.transpose(A)
         # B = np.dot(AT, A)
         # (valPropres, vectPropres) = np.linalg.eig(B)
@@ -124,7 +127,7 @@ class Panorama:
         Hflatten2 = V[len(V) - 1]
         HflattenNorm2 = Hflatten2 / Hflatten2[len(Hflatten2) - 1]
         Hnorm2 = HflattenNorm2.reshape(3, 3)
-        Hnorm2 = Hnorm2 * rapport
+        Hnorm2 = Hnorm2 
 
         return Hnorm2
 

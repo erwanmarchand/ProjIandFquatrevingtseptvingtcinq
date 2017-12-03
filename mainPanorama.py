@@ -32,4 +32,5 @@ else:
 
 # On créer le panorama
 minValues = Panorama.getFriendlyCouples(image_gauche, image_droite, 4, verbose=DEBUG, panorama_analyzer=analyzer)
+
 analyzer.analyze()
