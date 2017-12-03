@@ -261,6 +261,8 @@ class ExtremaDetector:
                                                  max(0, col - LIMIT)
 
                 image_travail = image_initiale[rowMin:(rowMax + 1), colMin:(colMax + 1)]
+
+                realRow, realCol = row, col
                 row, col = row - rowMin, col - colMin
 
                 # On travail sur l'image lissée avec le
@@ -325,7 +327,7 @@ class ExtremaDetector:
                 #  On renormalise
                 H_final = H_final / float(np.max(H_final))
 
-                descripteur = np.concatenate((np.array([row, col]), H_final))
+                descripteur = np.concatenate((np.array([realRow, realCol]), H_final))
                 descripteurs.append(descripteur)
 
         print("")  # Debuff pour la barre de chargement
