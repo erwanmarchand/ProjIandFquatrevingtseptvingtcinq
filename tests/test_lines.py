@@ -4,8 +4,8 @@
     Résultats : Un problème a été détécté sur la détéction d'extremum
 """
 
-
 import sys, os
+
 sys.path.append(os.getcwd())
 sys.path.append(os.getcwd() + "/..")
 
@@ -26,9 +26,9 @@ for i in range(1, 5):
     image = ImageManager.loadMatrix("images/" + "line" + str(i) + ".png")
 
     # On applique l'algorithme
+    analyzer = PyramidAnalyzer("out_lines/" + str(i))
     descriptors, analyzer = ImageProcessor.findKeypoints(image, 3, 2,
-                                                         analysis=True,
-                                                         analyzer_outdir="out_lines/" + str(i),
+                                                         pyramid_analyzer=analyzer,
                                                          minimum_contrast=0.10,
                                                          r_courb_principal=10)
 

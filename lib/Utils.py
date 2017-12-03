@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import copy
-import numpy as np
+import time
+import sys
 
 
 class Utils:
@@ -17,6 +18,7 @@ class Utils:
         :return: 
         """
         rPoints = []
+
         for kp in keypoints:
             try:
                 (x, y, j, a) = kp
@@ -50,11 +52,12 @@ class Utils:
 
         return rPoints
 
-    # @staticmethod
-    # def calculateOrientation(image, (row, col)):
-    #     m = np.sqrt((image[row + 1, col] - image[row - 1, col]) ** 2
-    #                   + (image[row, col + 1] - image[row, col - 1]) ** 2)
-    #     theta = np.arctan2((image[row, col + 1] - image[row, col - 1])
-    #                        , (image[row + 1, col] - image[row - 1, col]))
-    #
-    #     return m, (theta + 2 * np.pi) % (2 * np.pi)
+    @staticmethod
+    def updateProgress(workdone):
+        sys.stdout.write("\rProgress: [{0:50s}] {1:.1f}%".format('#' * int(workdone * 50), workdone * 100))
+        sys.stdout.flush()
+
+if __name__ == '__main__':
+    for i in range(0, 101, 10):
+        Utils.updateProgress(i / 100.)
+        time.sleep(1)

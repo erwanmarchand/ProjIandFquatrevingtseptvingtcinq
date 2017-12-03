@@ -9,9 +9,13 @@ import numpy as np
 
 IMAGES_PATH = "images/"
 NAME_IMAGE_GAUCHE = 'lena2left.jpg'
+NAME_IMAGE_GAUCHE = 'lena2left.jpg'
 NAME_IMAGE_DROITE = 'lena2right.jpg'
+NAME_IMAGE_GAUCHE = 'gauche.jpg'
+NAME_IMAGE_DROITE = 'droite.jpg'
 
 ANALYSIS = True
+ANALYSE_EACH_IMAGE = False
 DEBUG = True
 
 #  On charge les images et on les redimensionne
@@ -30,7 +34,10 @@ if ANALYSIS:
 else:
     analyzer = None
 
-# On créer le panorama
-minValues = Panorama.getFriendlyCouples(image_gauche, image_droite, 4, verbose=DEBUG, panorama_analyzer=analyzer)
+
+# On crée le panorama
+minValues = Panorama.getFriendlyCouples(image_gauche, image_droite, 4,
+                                        panorama_analyzer=analyzer,
+                                        analyse_each_image=ANALYSE_EACH_IMAGE)
 
 analyzer.analyze()

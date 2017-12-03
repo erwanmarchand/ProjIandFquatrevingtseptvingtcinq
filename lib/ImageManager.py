@@ -23,13 +23,15 @@ class ImageManager:
     @staticmethod
     def normalizeImage(image):
         image_max = max(abs(np.max(image)), abs(np.min(image)))
-        if image_max > 1:  # On vérifie que l'image n'est pas déja normalisée
-            return image / image_max
-        else:
-            return image
+
+        return image / image_max
 
     @staticmethod
     def divideSizeBy2(image):
+        return ImageManager.getOctave(image, 1)
+
+    @staticmethod
+    def multiplySizeBy2(image):
         return ImageManager.getOctave(image, 1)
 
     @staticmethod
@@ -84,7 +86,7 @@ class ImageManager:
                 kp3 = None
 
             if kp3 is not None:
-                radius = (keypoint[2] ** 1.5) * 10 * min(cols, rows) / 1024
+                radius = (keypoint[2] ** 1.5) * 8 * min(cols, rows) / 1024
                 image = cv2.circle(image, (keypoint[1], keypoint[0]), int(radius), point_color, 2)
 
                 # On dessine la fleche représentant l'orientation du point clé
@@ -100,10 +102,6 @@ class ImageManager:
             image = cv2.circle(image, (int(keypoint[1]), int(keypoint[0])), int(radius), point_color, 2)
 
         return image
-
-    @staticmethod
-    def makeDifference(img1, img2):
-        return img1 - img2
 
     @staticmethod
     def showImage(image, **kwargs):

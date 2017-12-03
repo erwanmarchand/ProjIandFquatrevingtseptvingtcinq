@@ -18,14 +18,14 @@ class PyramidAnalyzer(Analyzer):
         Analyzer.__init__(self, outpath)
 
         self.originalPicture = None
-        self.doubledImage = None
-        self.greyscalePicture = None
+        self.doubledPicture = None
+        self.greyscaleDoubledPicture = None
 
         self.sigmas = []
         self.imagePyramid = None
         self.dogPyramid = None
         self.octavesAnalyzers = []
-        self.keypoints = []
+        self.key_points = []
 
         self.descriptors = []
 
@@ -137,10 +137,10 @@ class PyramidAnalyzer(Analyzer):
         Log.debug("Génération de l'image finale des keypoints")
         plt.figure(fi + 1)
 
-        candidates = self.keypoints
+        candidates = self.key_points
         img = self.showKeyPoints(copy.deepcopy(self.originalPicture), candidates)
         plt.imshow(img)
-        plt.title("Keypoints - " + str(len(self.keypoints)))
+        plt.title("Keypoints - " + str(len(self.key_points)))
 
         # Affichage des points par octaves
         self.saveToFile("final")

@@ -21,13 +21,21 @@ class Panorama:
         # Chargement de l'analyseur
         panoramaAnalyzer = kwargs.get("panorama_analyzer", None)
 
+        pyramidAnalyzerLeft = PyramidAnalyzer("out_panorama_left/") if kwargs.get("analyse_each_image", False) else None
+        pyramidAnalyzerRight = PyramidAnalyzer("out_panorama_right/") if kwargs.get("analyse_each_image", False) else None
+
+
         # On applique l'algorithme sur chaque images
         keypointsLeft = ImageProcessor.findKeypoints(imgLeft, s, nb_octaves,
                                                         verbose=DEBUG,
-                                                        pyramid_analyzer=None)
+                                                        pyramid_analyzer=pyramidAnalyzerLeft)
         keypointsRight = ImageProcessor.findKeypoints(imgRight, s, nb_octaves,
                                                          verbose=DEBUG,
-                                                         pyramid_analyzer=None)
+                                                         pyramid_analyzer=pyramidAnalyzerRight)
+
+        if kwargs.get("analyse_each_image", False):
+            pyramidAnalyzerLeft.analyze()
+            pyramidAnalyzerRight.analyze()
 
         if panoramaAnalyzer:
             panoramaAnalyzer.keyPointsLeftPicture = copy.deepcopy(keypointsLeft)
@@ -51,11 +59,12 @@ class Panorama:
         euclidean_dist = np.zeros((nbr_key_points_img_left, nbr_key_points_img_right))
 
         for i in range(0, euclidean_dist.shape[0]):
-            if i % int(euclidean_dist.shape[0] / 20) == 0:
-                Log.debug(str(round(float(i) / float(euclidean_dist.shape[0]) * 100, 2)) + " %", 1)
+            Utils.updateProgress(float(i) / float(euclidean_dist.shape[0]))
 
             for j in range(0, euclidean_dist.shape[1]):
                 euclidean_dist[i][j] = _distanceEuclidean(points_image1[i], points_image2[j])
+
+        print("")
 
         return euclidean_dist
 
@@ -66,9 +75,7 @@ class Panorama:
 
         friendlyPoints = []
 
-        (SIFTPointsLeft, SIFTPointsRight) = Panorama.getSIFTPoints(imgLeft, imgRight,
-                                                                   panorama_analyzer=panoramaAnalyzer,
-                                                                   verbose=kwargs.get("verbose", False))
+        (SIFTPointsLeft, SIFTPointsRight) = Panorama.getSIFTPoints(imgLeft, imgRight, **kwargs)
 
         matrixDistances = Panorama.distanceInterPoints(SIFTPointsLeft, SIFTPointsRight,
                                                        panorama_analyzer=panoramaAnalyzer,

@@ -9,81 +9,109 @@ class ImageProcessor:
         pass
 
     @staticmethod
-    def findKeypoints(image_original, s, nb_octaves, **kwargs):
+    def prepareImage(image):
         Log.debug("Doublement de la taille de l'image")
-        image_doubled = ImageManager.getOctave(image_original, -1)
+        image_doubled = ImageManager.getOctave(image, -1)
 
-        # On convertit l'image en nuances de gris pour travailler dessus
         Log.debug("Conversion de l'image en niveaux de gris")
-        image_greyscale = ImageManager.getGreyscale(image_doubled)
+        image_greyscale = ImageManager.getGreyscale(image)
 
-        # On charge un analyseur afin de récolter des données sur notre script
-        if kwargs.get("analysis", False):
-            Log.debug("Chargement de l'analyseur")
-            pyramid_analyzer = PyramidAnalyzer(kwargs.get("analyzer_outdir", "out/"))
-            pyramid_analyzer.originalPicture = image_original
-            pyramid_analyzer.doubledImage = image_doubled
-            pyramid_analyzer.greyscalePicture = image_greyscale
-        else:
-            pyramid_analyzer = None
+        Log.debug("Doublement de la taille de l'image en niveaux de gris")
+        image_greyscale_doubled = ImageManager.getGreyscale(image_doubled)
 
-        # On vérifie que le nombre d'octave n'est pas trop grand
-        octave_debug = min(int(np.log2(image_greyscale.shape[0])), int(np.log2(image_greyscale.shape[1])), nb_octaves)
+        # On renvoi les images dans l'interval [0;1]
+        return image / 255., \
+               image_doubled / 255., \
+               image_greyscale / 255., \
+               image_greyscale_doubled / 255.
+
+    @staticmethod
+    def checkNbOctave(image_travail, nb_octaves):
+        octave_debug = min(int(np.log2(image_travail.shape[0])), int(np.log2(image_travail.shape[1])), nb_octaves)
         if octave_debug != nb_octaves:
-            Log.info("Le nombre d'octave a été changé à " + str(
-                    int(octave_debug)) + " afin d'éviter les problèmes de redimensionnement")
-            octave = octave_debug
+            Log.warn("Le nombre d'octave a été changé à " + str(
+                int(octave_debug)) + " afin d'éviter les problèmes de redimensionnement")
+            return octave_debug
 
-        # On construit la pyramide des gaussiennes
-        Log.debug("Construction de la pyramide des DoG")
-        DoGs, octaves, sigmas = ExtremaDetector.differenceDeGaussienne(image_greyscale, s, nb_octaves)
+        return nb_octaves
+
+    @staticmethod
+    def findKeypoints(image_original, s, nb_octaves, **kwargs):
+        if image_original is None:
+            raise Exception("Erreur : Aucune image envoyee")
+
+        image_original, image_doubled, image_greyscale, image_greyscale_doubled = ImageProcessor.prepareImage(image_original)
+        nb_octaves = ImageProcessor.checkNbOctave(image_doubled, nb_octaves)
+
+        Log.debug("Construction des pyramides des gaussiennes et des DoGs")
+        DoGs, octaves, sigmas = ExtremaDetector.differenceDeGaussienne(image_greyscale_doubled, s, nb_octaves)
         points_cles = []
 
-        if pyramid_analyzer:
-            pyramid_analyzer.sigmas = sigmas
-            pyramid_analyzer.dogPyramid = DoGs
-            pyramid_analyzer.imagePyramid = octaves
-
+        #  On applique une détéction de points clés sur chaque octave
         for i in range(len(octaves)):
-            if kwargs.get("verbose", False):
-                Log.debug("Debut de l'analyse de l'octave " + str(i + 1))
+            Log.debug("BEGIN -------------------------------- " + str(i + 1))
+            Log.debug("Debut de l'analyse de l'octave " + str(i + 1))
 
             points = ExtremaDetector.detectionPointsCles(
-                    DoGs[i],
-                    octaves[i],
-                    sigmas,
-                    kwargs.get("minimum_contrast", 0.20),
-                    kwargs.get("r_courb_principal", 10),
-                    1 / (2 ** i),
-                    i,
-                    pyramid_analyzer=pyramid_analyzer,
-                    verbose=kwargs.get("verbose", False)
+                DoGs[i],
+                octaves[i],
+                sigmas,
+                kwargs.get("minimum_contrast", 0.03),
+                kwargs.get("r_courb_principal", 7),
+                1 / (2 ** i),
+                i,
+                **kwargs
             )
 
             # On fait un rescale des points clés
             Log.debug("Rescale des points-clés sur l'image initiale", 1)
             octave_points = Utils.adaptKeypoints(points, i - 1)
 
-            Log.debug("Remplacement des sigmas par leur valeur", 1)
-            octave_points = Utils.adaptSigmas(octave_points, sigmas)
-
-            if kwargs.get("verbose", False):
-                Log.debug("Nombre de points pour l'octave " + str(i + 1) + " : " + str(len(octave_points)))
+            Log.debug("Nombre de points pour l'octave " + str(i + 1) + " : " + str(len(octave_points)))
 
             # On ajoute les nouveaux points clés à la liste
             points_cles = Utils.concatenateKeyPoints(points_cles, octave_points)
 
-        # Chargement de l'analyseur et lancement de l'analyse
-        if pyramid_analyzer:
-            pyramid_analyzer.keypoints = points_cles
+            Log.debug("END -------------------------------- " + str(i + 1))
+
+        Log.debug("Remplacement des sigmas par leur valeur", 1)
+        points_cles = Utils.adaptSigmas(points_cles, sigmas)
 
         Log.debug("Nombre total de points clés : " + str(len(points_cles)))
+
         Log.debug("Calcul des descripteurs....")
-        #descripteurs = ExtremaDetector.descriptionPointsCles(image_greyscale, points_cles)
-        descripteurs = None
+        descriptors = ExtremaDetector.descriptionPointsCles(image_greyscale, points_cles)
 
-        if pyramid_analyzer:
+        # On s'occupe d'un eventuel analyseur
+        ImageProcessor.fillAnalyzer(image_original,
+                                    image_doubled,
+                                    image_greyscale_doubled,
+                                    DoGs,
+                                    octaves,
+                                    sigmas,
+                                    points_cles,
+                                    descriptors,
+                                    **kwargs)
+
+        return descriptors
+
+    @staticmethod
+    def fillAnalyzer(image_original, image_doubled, image_greyscale_doubled, DoGs, octaves, sigmas, key_points, descriptors,
+                     **kwargs):
+        pyramid_analyzer = kwargs.get("pyramid_analyzer", None)
+
+        if pyramid_analyzer is not None:
+            Log.debug("Remplissage de l'analyseur")
+            pyramid_analyzer.originalPicture = copy.deepcopy(image_original)
+            pyramid_analyzer.doubledPicture = copy.deepcopy(image_doubled)
+            pyramid_analyzer.greyscaleDoubledPicture = copy.deepcopy(image_greyscale_doubled)
+
+            pyramid_analyzer.sigmas = copy.deepcopy(sigmas)
+
+            pyramid_analyzer.dogPyramid = copy.deepcopy(DoGs)
+            pyramid_analyzer.imagePyramid = copy.deepcopy(octaves)
+
+            pyramid_analyzer.key_points = copy.deepcopy(key_points)
+
             Log.debug("Enregistrement des descripteurs dans l'analyseur")
-            pyramid_analyzer.descriptors = descripteurs
-
-        return descripteurs
+            pyramid_analyzer.descriptors = copy.deepcopy(descriptors)

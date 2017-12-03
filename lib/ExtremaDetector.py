@@ -3,7 +3,8 @@ import copy
 
 from lib.ImageManager import *
 from lib.analysis.OctaveAnalyzer import *
-from lib.analysis.Utils import *
+from lib.Utils import *
+from lib.debug.Log import *
 
 
 class ExtremaDetector:
@@ -17,13 +18,10 @@ class ExtremaDetector:
         :param image:       L'image originale
         :param s:           Le facteur s
         :param nb_octave:   Le nombre d'octave à générer
-        :return:            (DoGs, pyramide des octaves, liste des sigmas)
+        :return:            (pyramide des DoGs, pyramide des octaves, liste des sigmas)
         """
-        if image is None:
-            raise Exception("Erreur : Aucune image envoyee")
 
         nb_element = s + 3
-        verbose = kwargs.get('verbose', False)
 
         # Construction de la pyramide de gaussiennes
         Log.debug("Génération de la pyramide de Gaussiennes", 1)
@@ -42,13 +40,13 @@ class ExtremaDetector:
 
         # Generation de la pyramide des différences
         Log.debug("Génération de la pyramide des différences de Gaussiennes", 1)
-        doG = [[] for k in range(nb_octave)]
+        DoGs = [[] for k in range(nb_octave)]
 
         for octave in range(nb_octave):
             for k in range(nb_element - 1):
-                doG[octave].append(ImageManager.makeDifference(pyramid[octave][k + 1], pyramid[octave][k]))
+                DoGs[octave].append(pyramid[octave][k + 1] - pyramid[octave][k])
 
-        return doG, pyramid, sigmas
+        return DoGs, pyramid, sigmas
 
     @staticmethod
     def detectionPointsCles(DoGs, octaves, sigmas, seuil_contraste, r_courb_principale, resolution_octave, octave_nb,
@@ -75,11 +73,6 @@ class ExtremaDetector:
         # Execution
         height, width = ImageManager.getDimensions(DoGs[0])
 
-        # Génération des DoGs normalisés (valeur en 0 et 1)
-        DoGsNormalized = []
-        for k in range(len(DoGs)):
-            DoGsNormalized.append(ImageManager.normalizeImage(DoGs[k]))
-
         def _filtrerPointsContraste():
             Log.debug("Demarrage du filtrage par contraste", 1)
             realPoints = []
@@ -89,7 +82,7 @@ class ExtremaDetector:
                 Log.debug("Traitement du sigma " + str(i_sigma) + " : " + str(sigmas[i_sigma]), 2)
                 for row in range(1, height - 1):
                     for col in range(1, width - 1):
-                        if abs(DoGsNormalized[i_sigma][row, col]) > seuil_contraste:
+                        if abs(DoGs[i_sigma][row, col]) >= seuil_contraste:
                             realPoints.append((row, col, i_sigma))
 
             return realPoints
@@ -98,19 +91,23 @@ class ExtremaDetector:
             Log.debug("Demarrage de la détection des extremums", 1)
             extremums = []
 
-            for c in candidats:
+            nb_candidats = len(candidats)
+
+            for nb, c in enumerate(candidats):
+                Utils.updateProgress(float(nb)/nb_candidats)
                 (row, col, i_sigma) = c
-                neighbours = []
 
-                neighbours += [DoGs[i_sigma - 1][row - 1:row + 2, col - 1:col + 2]]
-                neighbours += [DoGs[i_sigma][row - 1:row + 2, col - 1:col + 2]]
-                neighbours += [DoGs[i_sigma + 1][row - 1:row + 2, col - 1:col + 2]]
+                group_max, group_min = -np.inf, np.inf
 
-                neighbours = np.array(neighbours).flat
+                for o in range(-1, 2):
+                    elt = DoGs[i_sigma + o][(row - 1):(row + 1) + 1, (col - 1):(col + 1) + 1]
+                    group_max, group_min = max(group_max, elt.max()), min(group_min, elt.min())
 
-                # Si le point est effectivement le maximum de la region, c'est un point candidat
-                if DoGs[i_sigma][row, col] == np.max(neighbours) or DoGs[i_sigma][row, col] == np.min(neighbours):
+                # Si le point est un extremum de la region, c'est un point candidat
+                if DoGs[i_sigma][row, col] in [group_max, group_min]:
                     extremums.append(c)
+
+            print("")
 
             return extremums
 
@@ -120,12 +117,12 @@ class ExtremaDetector:
 
             Dx, Dy, Dxx, Dyy, Dxy = {}, {}, {}, {}, {}
 
-            Fy = np.matrix('-1 0 1;-2 0 2;-1 0 1')
-            Fx = np.matrix('1 2 1;0 0 0;-1 -2 -1')
+            Fx = np.matrix('-1 0 1;-2 0 2;-1 0 1')
+            Fy = np.matrix('1 2 1;0 0 0;-1 -2 -1')
 
             for k in range(1, len(DoGs) - 1):
-                Dx[k] = Filter.convolve2D(DoGsNormalized[k], Fx)
-                Dy[k] = Filter.convolve2D(DoGsNormalized[k], Fy)
+                Dx[k] = Filter.convolve2D(DoGs[k], Fx)
+                Dy[k] = Filter.convolve2D(DoGs[k], Fy)
 
             for k in range(1, len(DoGs) - 1):
                 Dxx[k] = Filter.convolve2D(Dx[k], Fx)
@@ -189,7 +186,7 @@ class ExtremaDetector:
                 Ms, As = M.flat, A.flat
 
                 for k, angle in enumerate(As):
-                    for si in range(36 + 1):
+                    for si in range(36):
                         if H_slice[si] < angle <= H_slice[si + 1]:
                             H[si] += Ms[k]
                             break
@@ -221,8 +218,6 @@ class ExtremaDetector:
         if analyseur:
             elements["kp_after_extremum_detection"] = copy.deepcopy(candidats)
 
-        ## BONUS EVENTUEL ICI
-
         # Filtrage des points sur les arêtes
         Log.debug(str(len(candidats)) + " points", 1)
         candidats = _filtrerPointsArete(candidats)
@@ -247,15 +242,38 @@ class ExtremaDetector:
 
     @staticmethod
     def descriptionPointsCles(image_initiale, points_cles):
-        rows, cols = ImageManager.getDimensions(image_initiale)
+        height, width = ImageManager.getDimensions(image_initiale)
         descripteurs = []
 
-        for (row, col, sigma, a) in points_cles:
-            # On élimine les points clés trop pret du bord
-            if not (row < 9 or col < 9 or rows - row < 9 or cols - col < 9):
+        H_angle = np.linspace(0, 2 * np.pi, 8 + 1)
+        nb_point_cles = len(points_cles)
 
-                # On fait une rotation de l'image
-                image_travail = ImageManager.rotate(image_initiale, -a * 180 / np.pi, (row, col))
+        LIMIT = int(8 * np.sqrt(2) + 8)
+        BORDER_LIMIT = 9
+
+        for n, (row, col, sigma, a) in enumerate(points_cles):
+            Utils.updateProgress(float(n) / nb_point_cles)
+
+            # On élimine les points clés trop pret du bord
+            if not (row < BORDER_LIMIT
+                    or col < BORDER_LIMIT
+                    or height - row < BORDER_LIMIT
+                    or width - col < BORDER_LIMIT):
+                rowMax, colMax, rowMin, colMin = min(height - 1, row + LIMIT), \
+                                                 min(width - 1, col + LIMIT), \
+                                                 max(0, row - LIMIT), \
+                                                 max(0, col - LIMIT)
+
+                image_travail = image_initiale[rowMin:(rowMax + 1), colMin:(colMax + 1)]
+
+                realRow, realCol = row, col
+                row, col = row - rowMin, col - colMin
+
+                # On travail sur l'image lissée avec le
+                # paramètre de facteur d'échelle le plus proche
+                # de celui du point-clé considéré
+                image_travail = ImageManager.applyGaussianFilter(image_travail, sigma)
+                image_travail = ImageManager.rotate(image_travail, -a * 180 / np.pi, (row, col))
 
                 # On dessine un carré de coté 16x16
                 zone_etude_g = image_travail[(row - 8):(row + 8), (col - 8) - 1:(col + 8) - 1]
@@ -265,15 +283,18 @@ class ExtremaDetector:
 
                 zone_etude_g1, zone_etude_g2 = zone_etude_d - zone_etude_g, zone_etude_b - zone_etude_h
 
-                # TODO : Fenètre gaussienne
-
                 # Calcul des amplitude des gradients et de l'orientation
                 M = np.sqrt(np.power(zone_etude_g1, 2) + np.power(zone_etude_g2, 2))
                 A = np.arctan2(zone_etude_g1, zone_etude_g2)
                 A = (A + 2 * np.pi) % (2 * np.pi)  # Opération permettant de revenir dans l'interval [0:2pi]
 
+                # On applique une fenêtre gaussienne centrée sur le point clé
+                gaussian = Filter.createGaussianFilter(8, 1.5 * sigma)
+                gaussian = gaussian[:16, :16]
+
+                M = M * gaussian  # Produit terme à terme
+
                 # On fait l'étude sur chaque carrés de coté 4x4 contenus dans la zone de travail
-                H_angle = np.linspace(0, 2 * np.pi, 8)
                 H_container = []
                 for i in range(4):
                     for j in range(4):
@@ -286,9 +307,9 @@ class ExtremaDetector:
                         H = [0.0] * 8
 
                         for k, angle in enumerate(As.flat):
-                            for l, an in enumerate(H_angle):
-                                if angle < an:
-                                    H[l] += float(Mf[k])
+                            for si in range(8):
+                                if angle <= H_angle[si + 1]:
+                                    H[si] += float(Mf[k])
                                     break
 
                         H_container.append(H)
@@ -310,7 +331,9 @@ class ExtremaDetector:
                 #  On renormalise
                 H_final = H_final / float(np.max(H_final))
 
-                descripteur = np.concatenate((np.array([row, col]), H_final))
+                descripteur = np.concatenate((np.array([int(realRow), int(realCol)]), H_final))
                 descripteurs.append(descripteur)
+
+        print("")  # Debuff pour la barre de chargement
 
         return descripteurs
