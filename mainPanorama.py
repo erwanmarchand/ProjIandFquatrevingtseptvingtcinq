@@ -33,16 +33,7 @@ if ANALYSIS:
 else:
     analyzer = None
 
-
 # On crée le panorama
-minValues = Panorama.getFriendlyCouples(image_gauche, image_droite, 10,
-                                        panorama_analyzer=analyzer,
-                                        analyse_each_image=ANALYSE_EACH_IMAGE)
-
-A = Panorama.getMatriceA(minValues)
-
-Hnorm = Panorama.getTransformMatrix(A)
-
-finalPicture = Panorama.generatePanorama(image_gauche,image_droite,Hnorm, panorama_analyzer=analyzer)
+finalPicture = Panorama.generatePanorama(image_gauche,image_droite, panorama_analyzer=analyzer)
 
 analyzer.analyze()

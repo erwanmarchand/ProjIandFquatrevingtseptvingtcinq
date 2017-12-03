@@ -152,16 +152,24 @@ class Panorama:
         return Hnorm2
 
     @staticmethod
-    def generatePanorama(leftPicture, rightPicture, homographyMatrix, **kwargs):
+    def generatePanorama(leftPicture, rightPicture, **kwargs):
         # Chargement de l'analyseur
         panoramaAnalyzer = kwargs.get("panorama_analyzer", None)
+
+        minValues = Panorama.getFriendlyCouples(leftPicture, rightPicture, 10,
+                                        panorama_analyzer=panoramaAnalyzer,
+                                        analyse_each_image=False)
+
+        A = Panorama.getMatriceA(minValues)
+
+        Hnorm = Panorama.getTransformMatrix(A)
 
         xMaxRight = rightPicture.shape[1] - 1
         yMaxRight = rightPicture.shape[0] - 1
         xMaxLeft = leftPicture.shape[1] - 1
         yMaxLeft = leftPicture.shape[0] - 1
 
-        [xMaxRightOnLeft, yMaxRightOnLeft, temp] = np.round(np.dot(homographyMatrix, [xMaxRight, yMaxRight, 1])).astype(
+        [xMaxRightOnLeft, yMaxRightOnLeft, temp] = np.round(np.dot(Hnorm, [xMaxRight, yMaxRight, 1])).astype(
             int)
         xMaxRightOnLeft = int(xMaxRightOnLeft)
         yMaxRightOnLeft = int(yMaxRightOnLeft)
@@ -173,7 +181,7 @@ class Panorama:
 
         for y in range(0, yMaxRight + 1):
             for x in range(0, xMaxRight + 1):
-                [xNew, yNew, temp] = np.round((np.dot(homographyMatrix, [x, y, 1]))).astype(int)
+                [xNew, yNew, temp] = np.round((np.dot(Hnorm, [x, y, 1]))).astype(int)
                 xNew = int(xNew)
                 yNew = int(yNew)
 

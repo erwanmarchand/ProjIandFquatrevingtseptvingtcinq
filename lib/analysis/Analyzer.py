@@ -14,7 +14,7 @@ class Analyzer:
         colors = kwargs.get("colors", None)
         if colors:
             for k, keypoint in enumerate(keypoints):
-                image = ImageManager.showKeyPoint(image, keypoint,color=colors[k%4])
+                image = ImageManager.showKeyPoint(image, keypoint,color=colors[k%10])
 
             return image
         for k, keypoint in enumerate(keypoints):

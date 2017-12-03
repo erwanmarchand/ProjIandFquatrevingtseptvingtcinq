@@ -23,7 +23,7 @@ class PanoramaAnalyzer(Analyzer):
 
         self.friendlyCouples = []
 
-        self.colors = [[0, 255, 255],[0, 255, 0],[255, 0, 255],[255, 255, 0]]
+        self.colors = [[0, 255, 255],[0, 255, 0],[255, 0, 255],[255, 255, 0],[255, 0, 0],[0 , 0 , 255],[153 , 102 , 0],[102 , 0 , 255],[153 , 102 , 255],[102 , 0 , 51]]
 
         matplotlib.rcParams.update({'font.size': 5})
 
