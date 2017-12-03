@@ -3,7 +3,8 @@ import copy
 
 from lib.ImageManager import *
 from lib.analysis.OctaveAnalyzer import *
-from lib.analysis.Utils import *
+from lib.Utils import *
+from lib.debug.Log import *
 
 
 class ExtremaDetector:
@@ -185,7 +186,7 @@ class ExtremaDetector:
                 Ms, As = M.flat, A.flat
 
                 for k, angle in enumerate(As):
-                    for si in range(36 + 1):
+                    for si in range(36):
                         if H_slice[si] < angle <= H_slice[si + 1]:
                             H[si] += Ms[k]
                             break
@@ -241,15 +242,32 @@ class ExtremaDetector:
 
     @staticmethod
     def descriptionPointsCles(image_initiale, points_cles):
-        rows, cols = ImageManager.getDimensions(image_initiale)
+        height, width = ImageManager.getDimensions(image_initiale)
         descripteurs = []
 
-        for (row, col, sigma, a) in points_cles:
-            # On élimine les points clés trop pret du bord
-            if not (row < 9 or col < 9 or rows - row < 9 or cols - col < 9):
+        H_angle = np.linspace(0, 2 * np.pi, 8 + 1)
+        nb_point_cles = len(points_cles)
 
-                # On fait une rotation de l'image
-                image_travail = ImageManager.rotate(image_initiale, -a * 180 / np.pi, (row, col))
+        LIMIT = int(8 * np.sqrt(2) + 10)
+
+        for n, (row, col, sigma, a) in enumerate(points_cles):
+            Utils.updateProgress(float(n) / nb_point_cles)
+
+            # On élimine les points clés trop pret du bord
+            if not (row < 9 or col < 9 or height - row < 9 or width - col < 9):
+                rowMax, colMax, rowMin, colMin = min(height - 1, row + LIMIT), \
+                                                 min(width - 1, col + LIMIT), \
+                                                 max(0, row - LIMIT), \
+                                                 max(0, col - LIMIT)
+
+                image_travail = image_initiale[rowMin:(rowMax + 1), colMin:(colMax + 1)]
+                row, col = row - rowMin, col - colMin
+
+                # On travail sur l'image lissée avec le
+                # paramètre de facteur d'échelle le plus proche
+                # de celui du point-clé considéré
+                image_travail = ImageManager.applyGaussianFilter(image_travail, sigma)
+                image_travail = ImageManager.rotate(image_travail, -a * 180 / np.pi, (row, col))
 
                 # On dessine un carré de coté 16x16
                 zone_etude_g = image_travail[(row - 8):(row + 8), (col - 8) - 1:(col + 8) - 1]
@@ -259,15 +277,18 @@ class ExtremaDetector:
 
                 zone_etude_g1, zone_etude_g2 = zone_etude_d - zone_etude_g, zone_etude_b - zone_etude_h
 
-                # TODO : Fenètre gaussienne
-
                 # Calcul des amplitude des gradients et de l'orientation
                 M = np.sqrt(np.power(zone_etude_g1, 2) + np.power(zone_etude_g2, 2))
                 A = np.arctan2(zone_etude_g1, zone_etude_g2)
                 A = (A + 2 * np.pi) % (2 * np.pi)  # Opération permettant de revenir dans l'interval [0:2pi]
 
+                # On applique une fenêtre gaussienne centrée sur le point clé
+                gaussian = Filter.createGaussianFilter(8, 1.5 * sigma)
+                gaussian = gaussian[:16, :16]
+
+                M = M * gaussian  # Produit terme à terme
+
                 # On fait l'étude sur chaque carrés de coté 4x4 contenus dans la zone de travail
-                H_angle = np.linspace(0, 2 * np.pi, 8)
                 H_container = []
                 for i in range(4):
                     for j in range(4):
@@ -280,9 +301,9 @@ class ExtremaDetector:
                         H = [0.0] * 8
 
                         for k, angle in enumerate(As.flat):
-                            for l, an in enumerate(H_angle):
-                                if angle < an:
-                                    H[l] += float(Mf[k])
+                            for si in range(8):
+                                if angle <= H_angle[si + 1]:
+                                    H[si] += float(Mf[k])
                                     break
 
                         H_container.append(H)
@@ -306,5 +327,7 @@ class ExtremaDetector:
 
                 descripteur = np.concatenate((np.array([row, col]), H_final))
                 descripteurs.append(descripteur)
+
+        print("")  # Debuff pour la barre de chargement
 
         return descripteurs
