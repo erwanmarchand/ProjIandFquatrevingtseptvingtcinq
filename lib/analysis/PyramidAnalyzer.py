@@ -18,8 +18,8 @@ class PyramidAnalyzer(Analyzer):
         Analyzer.__init__(self, outpath)
 
         self.originalPicture = None
-        self.doubledImage = None
-        self.greyscalePicture = None
+        self.doubledPicture = None
+        self.greyscaleDoubledPicture = None
 
         self.sigmas = []
         self.imagePyramid = None

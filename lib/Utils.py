@@ -17,6 +17,7 @@ class Utils:
         :return: 
         """
         rPoints = []
+
         for kp in keypoints:
             try:
                 (x, y, j, a) = kp
