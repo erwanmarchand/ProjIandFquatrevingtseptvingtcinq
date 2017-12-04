@@ -16,6 +16,13 @@ class Panorama:
 
     @staticmethod
     def getSIFTPoints(imgLeft, imgRight, **kwargs):
+        """
+        Récupère les poitns clés avec leurs descripteurs SIFT pour les 2 images
+        :param imgLeft:       L'image originale de gauche
+        :param imgRight:      L'image originale de droite
+        :return:              (liste des points clés avec descripteurs SIFT de l'image de gauche, 
+                                liste des points clés avec descripteurs SIFT de l'image de droite)
+        """
         s, nb_octaves = 3, 3
 
         # Chargement de l'analyseur
@@ -45,7 +52,19 @@ class Panorama:
 
     @staticmethod
     def distanceInterPoints(points_image1, points_image2, **kwargs):
+        """
+        Génère la matrice des distances euclidiennes des descripteurs SIFT entre chaque paire de points clés entre les 2 images
+        :param points_image1:       Points clés avec descripteurs de la 1ere image
+        :param points_image2:       Points clés avec descripteurs de la 2nde image
+        :return:                    Matrice des distances euclidiennes
+        """
         def _distanceEuclidean(point1, point2):
+            """
+            Calcule la distance euclidienne entre 2 descripteurs SIFT de points clés
+            :param point1:      Un 1er point clé avec descripteur
+            :param point2:      Un 2nd point clé avec descripteur
+            :return:            Distance euclidienne entre ces 2 descripteurs
+            """
             D = np.power((point1[2::] - point2[2::]), 2)
             result = np.sqrt(np.sum(D))
 
@@ -70,6 +89,13 @@ class Panorama:
 
     @staticmethod
     def getFriendlyCouples(imgLeft, imgRight, n, **kwargs):
+        """
+        Génère une liste des n paires de couples amis les plus proches (en distance euclidienne selon leur descripteurs SIFT) entre les 2 images
+        :param imgLeft:       L'image originale de gauche
+        :param imgRight:      L'image originale de droite
+        :param n:             Nombre de couples amis désirés
+        :return:              Liste de n paires de points clés
+        """
         # Chargement de l'analyseur
         panoramaAnalyzer = kwargs.get("panorama_analyzer", None)
 
@@ -112,6 +138,11 @@ class Panorama:
 
     @staticmethod
     def getMatriceA(friendlyPoints):
+        """
+        Génère la matrice A permettant de calculer la matrice d'homographie
+        :param friendlyPoints:       Liste des couples-amis de points clés
+        :return:                     Matrice A
+        """
         numberOfFriendlyPoints = len(friendlyPoints)
         matriceA = []
         for i in range(0, numberOfFriendlyPoints):
@@ -135,6 +166,11 @@ class Panorama:
 
     @staticmethod
     def getTransformMatrix(A):
+        """
+        Génère la matrice d'homographie
+        :param A:       matrice A
+        :return:        matrice d'homographie
+        """
         # AT = np.transpose(A)
         # B = np.dot(AT, A)
         # (valPropres, vectPropres) = np.linalg.eig(B)
@@ -153,6 +189,12 @@ class Panorama:
 
     @staticmethod
     def generatePanorama(leftPicture, rightPicture, **kwargs):
+        """
+        Génère le panorama
+        :param leftPicture:       L'image originale de gauche
+        :param rightPicture:      L'image originale de droite
+        :return:                  L'image du panorama final
+        """
         # Chargement de l'analyseur
         panoramaAnalyzer = kwargs.get("panorama_analyzer", None)
 
