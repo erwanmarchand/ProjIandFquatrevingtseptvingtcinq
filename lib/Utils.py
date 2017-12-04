@@ -3,6 +3,7 @@ import copy
 import time
 import sys
 
+ACTIVATE_LOAD_BAR = True
 
 class Utils:
     def __init__(self):
@@ -54,9 +55,9 @@ class Utils:
 
     @staticmethod
     def updateProgress(workdone):
-        #sys.stdout.write("\rProgress: [{0:50s}] {1:.1f}%".format('#' * int(workdone * 50), workdone * 100))
-        #sys.stdout.flush()
-        return
+        if ACTIVATE_LOAD_BAR:
+            sys.stdout.write("\rProgress: [{0:50s}] {1:.1f}%".format('#' * int(workdone * 50), workdone * 100))
+            sys.stdout.flush()
 
 if __name__ == '__main__':
     for i in range(0, 101, 10):

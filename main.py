@@ -7,7 +7,7 @@ import lib.debug.Log as Log_file
 import numpy as np
 
 IMAGES_PATH = "images/"
-NAME_PICTURE = 'lena.jpg'
+NAME_PICTURE = 'gauche.jpg'
 
 ANALYSIS = True
 DEBUG = True
@@ -22,10 +22,10 @@ Log.debug("Chargement de l'image")
 image = ImageManager.loadMatrix(IMAGES_PATH + NAME_PICTURE)
 
 # On applique l'algorithme
-analyzer = PyramidAnalyzer("out/")
+analyzer = PyramidAnalyzer("out_gauche/")
 descriptors = ImageProcessor.findKeypoints(image, S, NB_OCTAVE,
                                            pyramid_analyzer=analyzer,
-                                           minimum_contrast=0.20,
+                                           minimum_contrast=0.03,
                                            r_courb_principal=10)
 
 analyzer.analyze()

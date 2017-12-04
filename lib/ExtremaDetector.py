@@ -36,7 +36,10 @@ class ExtremaDetector:
                 octave_original = ImageManager.divideSizeBy2(pyramid[octave - 1][s])
 
             for k in range(nb_element):
+                Utils.updateProgress(float(octave * nb_element + k) / float(nb_element * nb_octave))
                 pyramid[octave].append(ImageManager.applyGaussianFilter(octave_original, sigmas[k]))
+
+        print("")
 
         # Generation de la pyramide des différences
         Log.debug("Génération de la pyramide des différences de Gaussiennes", 1)

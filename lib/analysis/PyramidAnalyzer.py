@@ -54,7 +54,9 @@ class PyramidAnalyzer(Analyzer):
             self.saveOctaves,
             self.generateGraph,
             self.saveFinal,
-            self.saveCv2Sift
+            self.saveCv2Sift,
+            self.saveMatrixKeypoints,
+            self.saveMatrixDescriptors
         ]
 
     def savePyramids(self, fi):
@@ -148,6 +150,20 @@ class PyramidAnalyzer(Analyzer):
         plt.cla()
 
         return fi + 1
+
+    def saveMatrixKeypoints(self, fi):
+        Log.debug("Génération de la matrice des points clés")
+        matrix = np.matrix(self.key_points)
+        np.save(self.outpath + "keypoints.npy", matrix)
+
+        return fi
+
+    def saveMatrixDescriptors(self, fi):
+        Log.debug("Génération de la matrice des descripteurs")
+        matrix = np.matrix(self.descriptors)
+        np.save(self.outpath + "descriptors.npy", matrix)
+
+        return fi
 
     def saveCv2Sift(self, fi):
         Log.debug("Génération de l'image de SIFT par OpenCV")
