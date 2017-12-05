@@ -10,3 +10,5 @@ class OctaveAnalyzer:
 
         self.elements = {}
         self.finalKeypoints = []
+
+        self.resolution = -1

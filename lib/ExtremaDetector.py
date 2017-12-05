@@ -36,7 +36,7 @@ class ExtremaDetector:
                 octave_original = ImageManager.divideSizeBy2(pyramid[octave - 1][s])
 
             for k in range(nb_element):
-                Utils.updateProgress(float(octave * nb_element + k) / float(nb_element * nb_octave))
+                Utils.updateProgress(float(octave * nb_element + k + 1) / float(nb_element * nb_octave))
                 pyramid[octave].append(ImageManager.applyGaussianFilter(octave_original, sigmas[k]))
 
         print("")
@@ -47,7 +47,10 @@ class ExtremaDetector:
 
         for octave in range(nb_octave):
             for k in range(nb_element - 1):
+                Utils.updateProgress(float(octave * (nb_element - 1) + k + 1) / float((nb_element - 1) * nb_octave))
                 DoGs[octave].append(pyramid[octave][k + 1] - pyramid[octave][k])
+
+        print("")
 
         return DoGs, pyramid, sigmas
 
@@ -237,9 +240,11 @@ class ExtremaDetector:
         if analyseur:
             analyseur.finalKeypoints = copy.deepcopy(candidats)
             analyseur.elements = elements
+            analyseur.resolution = resolution_octave
             pyramid_analyzer.addOctaveAnalyzer(analyseur)
 
-        Log.debug(str(len(candidats)) + " points", 1)
+        Log.debug("Total : " + str(len(candidats)) + " points", 1)
+
 
         return candidats
 

@@ -7,13 +7,13 @@ import lib.debug.Log as Log_file
 import numpy as np
 
 IMAGES_PATH = "images/"
-NAME_PICTURE = 'gauche.jpg'
+NAME_PICTURE = 'lena.jpg'
 
 ANALYSIS = True
 DEBUG = True
 
 S = 3
-NB_OCTAVE = 1
+NB_OCTAVE = 4
 
 #  On charge l'image et on la redimensionne
 Log_file.DEBUG_ACTIVATED = DEBUG

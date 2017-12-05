@@ -49,14 +49,15 @@ class PyramidAnalyzer(Analyzer):
 
     def getFunctions(self):
         return [
+            self.generateAnalysisGraph,
             self.saveCandidats,
             self.savePyramids,
             self.saveOctaves,
-            self.generateGraph,
             self.saveFinal,
             self.saveCv2Sift,
             self.saveMatrixKeypoints,
-            self.saveMatrixDescriptors
+            self.saveMatrixDescriptors,
+            self.generateCSVArrayAnalysis
         ]
 
     def savePyramids(self, fi):
@@ -151,6 +152,47 @@ class PyramidAnalyzer(Analyzer):
 
         return fi + 1
 
+    def generateCSVArrayAnalysis(self, fi):
+        Log.debug("Génération du tableau d'analyse des points")
+
+        header = "Octave;" \
+                 "Nombre de point de l'image;" \
+                 "Nombre de point de faibles constrates éliminés;" \
+                 "Nombre total d'extremums détectés;" \
+                 "Nombre de points d’arrêtes éliminés"
+
+        lines = [header]
+
+        for oa in self.octavesAnalyzers:
+            elt = "\n" + str(oa.octaveNb) + ";"
+            elt += str(oa.octaveWidth * oa.octaveHeight) + ";"
+            elt += str(oa.octaveWidth * oa.octaveHeight - len(oa.elements["kp_after_contrast_limitation"])) + ";"
+            elt += str(len(oa.elements["kp_after_extremum_detection"])) + ";"
+            elt += str(len(oa.elements["kp_after_extremum_detection"]) - len(oa.elements["kp_after_hessian_filter"]))
+
+            lines.append(elt)
+
+        with open(self.outpath + "analyzer.csv", "w") as f:
+            f.writelines(lines)
+
+        return fi
+
+    def generateAnalysisGraph(self, fi):
+        Log.debug("Génération du graph d'analyse")
+
+        plt.figure(fi + 1)
+
+        X, Y = [], []
+
+        for oa in self.octavesAnalyzers[::-1]:
+            X.append(oa.resolution)
+            Y.append(len(oa.finalKeypoints))
+
+        plt.scatter(X, Y)
+        self.saveToFile("kp_evolution")
+
+        return fi + 1
+
     def saveMatrixKeypoints(self, fi):
         Log.debug("Génération de la matrice des points clés")
         matrix = np.matrix(self.key_points)
@@ -180,7 +222,4 @@ class PyramidAnalyzer(Analyzer):
         plt.imshow(out_image)
         self.saveToFile("cv2_result")
 
-        return fi + 1
-
-    def generateGraph(self, fi):
         return fi + 1
