@@ -2,13 +2,10 @@
 from lib.ImageProcessor import *
 from lib.analysis.PyramidAnalyzer import *
 from lib.debug.Log import *
+from lib.Utils import *
 
 import numpy as np
 import copy
-
-import imutils
-import cv2
-
 
 class Panorama:
     def __init__(self):
@@ -29,16 +26,16 @@ class Panorama:
         panoramaAnalyzer = kwargs.get("panorama_analyzer", None)
 
         pyramidAnalyzerLeft = PyramidAnalyzer("out_panorama_left/") if kwargs.get("analyse_each_image", False) else None
-        pyramidAnalyzerRight = PyramidAnalyzer("out_panorama_right/") if kwargs.get("analyse_each_image", False) else None
-
+        pyramidAnalyzerRight = PyramidAnalyzer("out_panorama_right/") if kwargs.get("analyse_each_image",
+                                                                                    False) else None
 
         # On applique l'algorithme sur chaque images
         keypointsLeft = ImageProcessor.findKeypoints(imgLeft, s, nb_octaves,
-                                                        verbose=DEBUG,
-                                                        pyramid_analyzer=pyramidAnalyzerLeft)
+                                                     verbose=DEBUG,
+                                                     pyramid_analyzer=pyramidAnalyzerLeft)
         keypointsRight = ImageProcessor.findKeypoints(imgRight, s, nb_octaves,
-                                                         verbose=DEBUG,
-                                                         pyramid_analyzer=pyramidAnalyzerRight)
+                                                      verbose=DEBUG,
+                                                      pyramid_analyzer=pyramidAnalyzerRight)
 
         if kwargs.get("analyse_each_image", False):
             pyramidAnalyzerLeft.analyze()
@@ -48,7 +45,7 @@ class Panorama:
             panoramaAnalyzer.keyPointsLeftPicture = copy.deepcopy(keypointsLeft)
             panoramaAnalyzer.keyPointsRightPicture = copy.deepcopy(keypointsRight)
 
-        return (keypointsLeft, keypointsRight)
+        return keypointsLeft, keypointsRight
 
     @staticmethod
     def distanceInterPoints(points_image1, points_image2, **kwargs):
@@ -58,6 +55,7 @@ class Panorama:
         :param points_image2:       Points clés avec descripteurs de la 2nde image
         :return:                    Matrice des distances euclidiennes
         """
+
         def _distanceEuclidean(point1, point2):
             """
             Calcule la distance euclidienne entre 2 descripteurs SIFT de points clés
@@ -83,7 +81,7 @@ class Panorama:
             for j in range(0, euclidean_dist.shape[1]):
                 euclidean_dist[i][j] = _distanceEuclidean(points_image1[i], points_image2[j])
 
-        print("")
+        Utils.unloadBuffer()
 
         return euclidean_dist
 
@@ -121,9 +119,8 @@ class Panorama:
             alreadyInFriends = False
 
             for friend in friendlyPoints:
-                if friend[0][0] == yLeftKP :
+                if friend[0][0] == yLeftKP:
                     alreadyInFriends = True
-
 
             if not alreadyInFriends:
                 friendlyPoints.append((SIFTPointsLeft[iMin], SIFTPointsRight[jMin]))
@@ -183,7 +180,7 @@ class Panorama:
         Hflatten2 = V[len(V) - 1]
         HflattenNorm2 = Hflatten2 / Hflatten2[len(Hflatten2) - 1]
         Hnorm2 = HflattenNorm2.reshape(3, 3)
-        Hnorm2 = Hnorm2 
+        Hnorm2 = Hnorm2
 
         return Hnorm2
 
@@ -199,8 +196,8 @@ class Panorama:
         panoramaAnalyzer = kwargs.get("panorama_analyzer", None)
 
         minValues = Panorama.getFriendlyCouples(leftPicture, rightPicture, 10,
-                                        panorama_analyzer=panoramaAnalyzer,
-                                        analyse_each_image=False)
+                                                panorama_analyzer=panoramaAnalyzer,
+                                                analyse_each_image=False)
 
         A = Panorama.getMatriceA(minValues)
 

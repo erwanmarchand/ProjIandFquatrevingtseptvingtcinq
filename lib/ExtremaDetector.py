@@ -39,7 +39,7 @@ class ExtremaDetector:
                 Utils.updateProgress(float(octave * nb_element + k + 1) / float(nb_element * nb_octave))
                 pyramid[octave].append(ImageManager.applyGaussianFilter(octave_original, sigmas[k]))
 
-        print("")
+        Utils.unloadBuffer()
 
         # Generation de la pyramide des différences
         Log.debug("Génération de la pyramide des différences de Gaussiennes", 1)
@@ -50,7 +50,7 @@ class ExtremaDetector:
                 Utils.updateProgress(float(octave * (nb_element - 1) + k + 1) / float((nb_element - 1) * nb_octave))
                 DoGs[octave].append(pyramid[octave][k + 1] - pyramid[octave][k])
 
-        print("")
+        Utils.unloadBuffer()
 
         return DoGs, pyramid, sigmas
 
@@ -100,7 +100,7 @@ class ExtremaDetector:
             nb_candidats = len(candidats)
 
             for nb, c in enumerate(candidats):
-                Utils.updateProgress(float(nb)/nb_candidats)
+                Utils.updateProgress(float(nb) / nb_candidats)
                 (row, col, i_sigma) = c
 
                 group_max, group_min = -np.inf, np.inf
@@ -113,7 +113,7 @@ class ExtremaDetector:
                 if DoGs[i_sigma][row, col] in [group_max, group_min]:
                     extremums.append(c)
 
-            print("")
+            Utils.unloadBuffer()
 
             return extremums
 
@@ -245,7 +245,6 @@ class ExtremaDetector:
 
         Log.debug("Total : " + str(len(candidats)) + " points", 1)
 
-
         return candidats
 
     @staticmethod
@@ -342,6 +341,6 @@ class ExtremaDetector:
                 descripteur = np.concatenate((np.array([int(realRow), int(realCol)]), H_final))
                 descripteurs.append(descripteur)
 
-        print("")  # Debuff pour la barre de chargement
+        Utils.unloadBuffer()
 
         return descripteurs

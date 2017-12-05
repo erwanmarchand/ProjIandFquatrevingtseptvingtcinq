@@ -59,6 +59,11 @@ class Utils:
             sys.stdout.write("\rProgress: [{0:50s}] {1:.1f}%".format('#' * int(workdone * 50), workdone * 100))
             sys.stdout.flush()
 
+    @staticmethod
+    def unloadBuffer():
+        if ACTIVATE_LOAD_BAR:
+            print("")
+
 if __name__ == '__main__':
     for i in range(0, 101, 10):
         Utils.updateProgress(i / 100.)
