@@ -4,7 +4,7 @@ from lib.ImageManager import *
 
 class Analyzer:
     def __init__(self, outpath="out/"):
-        self.SAVE_DPI = 300
+        self.SAVE_DPI = 200
         self.SAVE_EXTENSION = "png"
 
         self.outpath = outpath if outpath[-1] == "/" else outpath + "/"
@@ -14,7 +14,7 @@ class Analyzer:
         colors = kwargs.get("colors", None)
         if colors:
             for k, keypoint in enumerate(keypoints):
-                image = ImageManager.showKeyPoint(image, keypoint,color=colors[k%10])
+                image = ImageManager.showKeyPoint(image, keypoint, color=colors[k % 10])
 
             return image
         for k, keypoint in enumerate(keypoints):

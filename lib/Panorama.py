@@ -7,6 +7,7 @@ from lib.Utils import *
 import numpy as np
 import copy
 
+
 class Panorama:
     def __init__(self):
         pass
@@ -25,8 +26,8 @@ class Panorama:
         # Chargement de l'analyseur
         panoramaAnalyzer = kwargs.get("panorama_analyzer", None)
 
-        pyramidAnalyzerLeft = PyramidAnalyzer("out_panorama_left/") if kwargs.get("analyse_each_image", False) else None
-        pyramidAnalyzerRight = PyramidAnalyzer("out_panorama_right/") if kwargs.get("analyse_each_image",
+        pyramidAnalyzerLeft = PyramidAnalyzer("out/panorama_left/") if kwargs.get("analyse_each_image", False) else None
+        pyramidAnalyzerRight = PyramidAnalyzer("out/panorama_right/") if kwargs.get("analyse_each_image",
                                                                                     False) else None
 
         # On applique l'algorithme sur chaque images
@@ -197,7 +198,7 @@ class Panorama:
 
         minValues = Panorama.getFriendlyCouples(leftPicture, rightPicture, 10,
                                                 panorama_analyzer=panoramaAnalyzer,
-                                                analyse_each_image=False)
+                                                analyse_each_image=kwargs.get("analyse_each_image", False))
 
         A = Panorama.getMatriceA(minValues)
 

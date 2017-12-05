@@ -40,7 +40,8 @@ class ImageProcessor:
         if image_original is None:
             raise Exception("Erreur : Aucune image envoyee")
 
-        image_original, image_doubled, image_greyscale, image_greyscale_doubled = ImageProcessor.prepareImage(image_original)
+        image_original, image_doubled, image_greyscale, image_greyscale_doubled = ImageProcessor.prepareImage(
+            image_original)
         nb_octaves = ImageProcessor.checkNbOctave(image_doubled, nb_octaves)
 
         Log.debug("Construction des pyramides des gaussiennes et des DoGs")
@@ -96,7 +97,8 @@ class ImageProcessor:
         return descriptors
 
     @staticmethod
-    def fillAnalyzer(image_original, image_doubled, image_greyscale_doubled, DoGs, octaves, sigmas, key_points, descriptors,
+    def fillAnalyzer(image_original, image_doubled, image_greyscale_doubled, DoGs, octaves, sigmas, key_points,
+                     descriptors,
                      **kwargs):
         pyramid_analyzer = kwargs.get("pyramid_analyzer", None)
 
