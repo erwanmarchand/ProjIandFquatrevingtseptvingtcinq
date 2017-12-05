@@ -11,16 +11,16 @@ import lib.debug.Log as Log_file
 import lib.Utils as Utils_file
 
 # Configuration générale
-IMAGES_PATH = "images/"
+IMAGES_DIR = "images/"
 OUT_DIR = "out/"
 Log_file.DEBUG_ACTIVATED = True  # False si vous voulez que les logs soit désactivés
 Utils_file.ACTIVATE_LOAD_BAR = True  # False si vous voulez que les load bar soit désactivés (sous windows notamnent)
 
-# Paramètres de tests
-PICTURES = ["gauche.jpg", "droite.jpg", "notre-dame.png", "lena.jpg"]
-CONSTRAST_ARGS = [0.01, 0.02, 0.03]
-HESSIAN_ARGS = [5, 7, 10]
-NB_OCTAVES = [1, 4]
+# Paramètres des tests
+PICTURES = ["gauche.jpg", "droite.jpg", "lena.jpg"]
+CONSTRAST_ARGS = [0.03, 0.04]
+HESSIAN_ARGS = [7, 10]
+NB_OCTAVES = [1]
 
 #  Execution
 for p in PICTURES:
@@ -31,7 +31,7 @@ for p in PICTURES:
                 p_name = p.split('.')[0]
 
                 Log.debug("Chargement de l'image " + p_name)
-                image = ImageManager.loadMatrix(IMAGES_PATH + p)
+                image = ImageManager.loadMatrix(IMAGES_DIR + p)
 
                 # On applique l'algorithme
                 analyzer = PyramidAnalyzer(OUT_DIR + p_name + "_" + str(n) + "_" + str(c) + "_" + str(h) + "/")

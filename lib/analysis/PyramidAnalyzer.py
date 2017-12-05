@@ -54,7 +54,6 @@ class PyramidAnalyzer(Analyzer):
             self.savePyramids,
             self.saveOctaves,
             self.saveFinal,
-            self.saveCv2Sift,
             self.saveMatrixKeypoints,
             self.saveMatrixDescriptors,
             self.generateCSVArrayAnalysis

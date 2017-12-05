@@ -4,7 +4,7 @@ from lib.ImageManager import *
 
 class Analyzer:
     def __init__(self, outpath="out/"):
-        self.SAVE_DPI = 1500
+        self.SAVE_DPI = 300
         self.SAVE_EXTENSION = "png"
 
         self.outpath = outpath if outpath[-1] == "/" else outpath + "/"
