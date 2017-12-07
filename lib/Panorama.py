@@ -24,27 +24,27 @@ class Panorama:
         s, nb_octaves = 3, 3
 
         # Chargement de l'analyseur
-        panoramaAnalyzer = kwargs.get("panorama_analyzer", None)
+        panorama_analyzer = kwargs.get("panorama_analyzer", None)
 
-        pyramidAnalyzerLeft = PyramidAnalyzer("out/panorama_left/") if kwargs.get("analyse_each_image", False) else None
-        pyramidAnalyzerRight = PyramidAnalyzer("out/panorama_right/") if kwargs.get("analyse_each_image",
+        pyramid_analyzer_left = PyramidAnalyzer("out/panorama_left/") if kwargs.get("analyse_each_image", False) else None
+        pyramid_analyzer_right = PyramidAnalyzer("out/panorama_right/") if kwargs.get("analyse_each_image",
                                                                                     False) else None
 
         # On applique l'algorithme sur chaque images
         keypointsLeft = ImageProcessor.findKeypoints(imgLeft, s, nb_octaves,
                                                      verbose=DEBUG,
-                                                     pyramid_analyzer=pyramidAnalyzerLeft)
+                                                     pyramid_analyzer=pyramid_analyzer_left)
         keypointsRight = ImageProcessor.findKeypoints(imgRight, s, nb_octaves,
                                                       verbose=DEBUG,
-                                                      pyramid_analyzer=pyramidAnalyzerRight)
+                                                      pyramid_analyzer=pyramid_analyzer_right)
 
         if kwargs.get("analyse_each_image", False):
-            pyramidAnalyzerLeft.analyze()
-            pyramidAnalyzerRight.analyze()
+            pyramid_analyzer_left.analyze()
+            pyramid_analyzer_right.analyze()
 
-        if panoramaAnalyzer:
-            panoramaAnalyzer.keyPointsLeftPicture = copy.deepcopy(keypointsLeft)
-            panoramaAnalyzer.keyPointsRightPicture = copy.deepcopy(keypointsRight)
+        if panorama_analyzer:
+            panorama_analyzer.keyPointsLeftPicture = copy.deepcopy(keypointsLeft)
+            panorama_analyzer.keyPointsRightPicture = copy.deepcopy(keypointsRight)
 
         return keypointsLeft, keypointsRight
 

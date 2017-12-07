@@ -14,9 +14,9 @@ IMAGES_PATH = "images/"
 NAME_IMAGE_GAUCHE = 'gauche.jpg'
 NAME_IMAGE_DROITE = 'droite.jpg'
 
-ANALYSIS = True
-ANALYSE_EACH_IMAGE = False
-DEBUG = True
+ANALYSIS = True             # Lancer une analyse du panorama ?
+ANALYSE_EACH_IMAGE = True   # Lancer une analyse des points clés pour chaque image ?
+DEBUG = True                # Afficher les logs ?
 
 # EXECUTION
 # ---------------------------------- #

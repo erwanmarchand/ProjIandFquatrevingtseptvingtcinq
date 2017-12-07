@@ -3,7 +3,7 @@ import copy
 import time
 import sys
 
-ACTIVATE_LOAD_BAR = True
+ACTIVATE_LOAD_BAR = False
 
 class Utils:
     def __init__(self):

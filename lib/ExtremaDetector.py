@@ -249,6 +249,12 @@ class ExtremaDetector:
 
     @staticmethod
     def descriptionPointsCles(image_initiale, points_cles):
+        """
+        Calcul et retourne les descripteurs d'une image
+        :param image_initiale:  L'image de départ
+        :param points_cles:     La liste des points clés précédemment calculés
+        :return:                La liste des descripteurs
+        """
         height, width = ImageManager.getDimensions(image_initiale)
         descripteurs = []
 

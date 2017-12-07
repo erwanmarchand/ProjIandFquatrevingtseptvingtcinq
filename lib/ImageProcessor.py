@@ -58,7 +58,7 @@ class ImageProcessor:
                 octaves[i],
                 sigmas,
                 kwargs.get("minimum_contrast", 0.03),
-                kwargs.get("r_courb_principal", 7),
+                kwargs.get("r_courb_principal", 10),
                 1. / (2. ** (i - 1)),
                 i,
                 **kwargs

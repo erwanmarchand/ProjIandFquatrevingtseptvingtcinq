@@ -18,7 +18,7 @@ Log_file.DEBUG_ACTIVATED = True  # False si vous voulez que les logs soit désac
 Utils_file.ACTIVATE_LOAD_BAR = True  # False si vous voulez que les loadbar soit désactivées (sous windows notamnent)
 
 # Paramètres des tests
-PICTURES = ["gauche.jpg"]
+PICTURES = ["gauche.jpg", "droite.jpg"]
 CONSTRAST_ARGS = [0.03]
 HESSIAN_ARGS = [10]
 NB_OCTAVES = [4]
